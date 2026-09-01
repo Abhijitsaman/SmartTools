@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartTools — Calculate. Convert. Create. Learn. Play.</title>
+<meta name="description" content="One website, hundreds of useful tools: calculators, converters, text tools, brain games, quizzes and more — all free, all in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --radius: 14px;
+    --radius-sm: 9px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  html[data-theme="dark"]{
+    --bg: #0D1117;
+    --bg-soft: #10151D;
+    --surface: #171E29;
+    --surface-2: #1E2733;
+    --border: #29323F;
+    --text: #E7ECF3;
+    --text-dim: #93A0B4;
+    --text-faint: #5E6B7E;
+    --accent: #5B8CFF;
+    --accent-2: #8C6BFF;
+    --on-accent: #06101F;
+    --success: #35D08C;
+    --warning: #F5B54C;
+    --danger: #FF6B7A;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  html[data-theme="light"]{
+    --bg: #F5F6FA;
+    --bg-soft: #EEF0F6;
+    --surface: #FFFFFF;
+    --surface-2: #FBFBFE;
+    --border: #E1E4EC;
+    --text: #161A22;
+    --text-dim: #5B6472;
+    --text-faint: #8991A0;
+    --accent: #3B63E0;
+    --accent-2: #7248DB;
+    --on-accent: #FFFFFF;
+    --success: #17965F;
+    --warning: #A6710A;
+    --danger: #D5384C;
+    --shadow: 0 10px 30px rgba(20,30,60,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  a{color:inherit;text-decoration:none;}
+  h1,h2,h3,h4{font-family:var(--font-display); margin:0; letter-spacing:-0.01em;}
+  button, input, select, textarea{font-family:inherit; color:inherit;}
+  ::selection{background:var(--accent); color:var(--on-accent);}
+
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+  /* ---------- Layout shell ---------- */
+  #topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(13,17,23,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  html[data-theme="light"] #topbar{ background:rgba(245,246,250,0.86); }
+  .topbar-inner{
+    max-width:1240px; margin:0 auto; padding:12px 20px;
+    display:flex; align-items:center; gap:16px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; flex-shrink:0; cursor:pointer; }
+  .brand-mark{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .brand-mark svg{ width:19px; height:19px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+
+  .searchwrap{ position:relative; flex:1; max-width:560px; }
+  .searchbox{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:11px; padding:9px 13px;
+  }
+  .searchbox:focus-within{ border-color:var(--accent); }
+  .searchbox svg{ width:17px; height:17px; color:var(--text-faint); flex-shrink:0; }
+  .searchbox input{
+    background:none; border:none; outline:none; width:100%;
+    font-size:14.5px; color:var(--text);
+  }
+  .searchbox input::placeholder{ color:var(--text-faint); }
+  .search-clear{ background:none; border:none; cursor:pointer; color:var(--text-faint); padding:2px; display:none; }
+  .search-clear.show{ display:block; }
+  .search-results{
+    position:absolute; top:calc(100% + 8px); left:0; right:0;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; box-shadow:var(--shadow);
+    max-height:420px; overflow-y:auto; z-index:60; display:none;
+  }
+  .search-results.open{ display:block; }
+  .search-item{
+    display:flex; align-items:center; gap:11px; padding:10px 13px;
+    cursor:pointer; border-bottom:1px solid var(--border);
+  }
+  .search-item:last-child{ border-bottom:none; }
+  .search-item:hover, .search-item.active{ background:var(--surface-2); }
+  .search-item .si-icon{
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-soft);
+  }
+  .search-item .si-icon svg{ width:16px; height:16px; }
+  .si-name{ font-weight:600; font-size:14px; }
+  .si-cat{ font-size:12px; color:var(--text-faint); }
+  .search-empty{ padding:18px; text-align:center; color:var(--text-faint); font-size:14px; }
+
+  .topbar-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    background:var(--surface); border:1px solid var(--border);
+    width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .icon-btn:hover{ border-color:var(--accent); }
+  .icon-btn svg{ width:18px; height:18px; }
+
+  .catnav{
+    border-bottom:1px solid var(--border);
+    overflow-x:auto; white-space:nowrap; scrollbar-width:none;
+  }
+  .catnav::-webkit-scrollbar{ display:none; }
+  .catnav-inner{ max-width:1240px; margin:0 auto; padding:9px 20px; display:flex; gap:8px; }
+  .chip{
+    flex-shrink:0; padding:7px 13px; border-radius:20px; font-size:13px; font-weight:500;
+    background:var(--surface); border:1px solid var(--border); cursor:pointer; color:var(--text-dim);
+  }
+  .chip:hover{ color:var(--text); border-color:var(--accent); }
+  .chip.active{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+
+  #app{ max-width:1240px; margin:0 auto; padding:28px 20px 70px; min-height:60vh; }
+
+  footer{ border-top:1px solid var(--border); padding:34px 20px; margin-top:40px; }
+  .footer-inner{ max-width:1240px; margin:0 auto; display:flex; flex-wrap:wrap; gap:26px; justify-content:space-between; align-items:center; }
+  .footer-links{ display:flex; gap:18px; flex-wrap:wrap; }
+  .footer-links a{ color:var(--text-dim); font-size:13.5px; }
+  .footer-links a:hover{ color:var(--accent); }
+  .footer-tag{ color:var(--text-faint); font-size:13px; }
+
+  /* ---------- Home ---------- */
+  .hero{ padding:38px 0 30px; text-align:center; }
+  .hero h1{ font-size:clamp(28px,5vw,44px); font-weight:700; }
+  .hero .accent-word{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p{ color:var(--text-dim); margin-top:10px; font-size:15.5px; }
+  .hero-search{ max-width:640px; margin:26px auto 0; }
+  .hero-search .searchbox{ padding:13px 16px; border-radius:14px; }
+  .hero-search .searchbox input{ font-size:16px; }
+
+  .quickactions{ display:flex; gap:9px; flex-wrap:wrap; justify-content:center; margin-top:18px; }
+  .qa-pill{
+    padding:8px 15px; border-radius:20px; background:var(--surface); border:1px solid var(--border);
+    font-size:13.5px; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+  .qa-pill:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .section{ margin-top:38px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+  .section-head h2{ font-size:19px; font-weight:700; }
+  .section-head .see-all{ font-size:13px; color:var(--accent); cursor:pointer; font-weight:600; }
+
+  .tool-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; }
+
+  .tool-card{
+    background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--cat-color, var(--accent));
+    border-radius:var(--radius-sm); padding:14px 15px; cursor:pointer; position:relative;
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .tool-card:hover{ transform:translateY(-2px); border-color:var(--accent); }
+  .tool-card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .tc-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .tc-icon{ width:34px; height:34px; border-radius:9px; background:var(--bg-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tc-icon svg{ width:17px; height:17px; color:var(--cat-color,var(--accent)); }
+  .fav-btn{ background:none; border:none; cursor:pointer; color:var(--text-faint); padding:2px; flex-shrink:0; }
+  .fav-btn.active{ color:var(--warning); }
+  .fav-btn svg{ width:17px; height:17px; }
+  .tc-name{ font-weight:600; font-size:14.5px; margin-top:9px; }
+  .tc-desc{ font-size:12.5px; color:var(--text-dim); margin-top:3px; line-height:1.4; }
+  .tc-cat{ font-size:11px; color:var(--text-faint); margin-top:8px; text-transform:capitalize; }
+
+  .cat-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+  .cat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:9px;
+  }
+  .cat-card:hover{ border-color:var(--accent); }
+  .cat-card .cc-icon{ width:38px; height:38px; border-radius:10px; background:var(--bg-soft); display:flex; align-items:center; justify-content:center; }
+  .cat-card .cc-icon svg{ width:19px; height:19px; color:var(--cat-color,var(--accent)); }
+  .cat-card .cc-name{ font-weight:600; font-size:14.5px; }
+  .cat-card .cc-count{ font-size:12px; color:var(--text-faint); }
+
+  .empty-note{ color:var(--text-faint); font-size:13.5px; padding:16px 0; }
+
+  /* ---------- Tool / Category page ---------- */
+  .breadcrumb{ font-size:13px; color:var(--text-faint); margin-bottom:16px; }
+  .breadcrumb a:hover{ color:var(--accent); }
+  .breadcrumb .sep{ margin:0 6px; }
+
+  .tool-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+  .tool-header h1{ font-size:25px; }
+  .tool-header p{ color:var(--text-dim); font-size:14px; margin-top:6px; max-width:640px; }
+  .tool-header-actions{ display:flex; gap:8px; flex-shrink:0; }
+
+  .tool-panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; margin-bottom:8px;
+  }
+
+  .field-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .field{ display:flex; flex-direction:column; gap:5px; flex:1; min-width:130px; }
+  .field label{ font-size:12.5px; color:var(--text-dim); font-weight:500; }
+  input[type=text], input[type=number], input[type=date], input[type=datetime-local], select, textarea{
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:9px;
+    padding:9px 11px; font-size:14.5px; color:var(--text); outline:none; width:100%;
+  }
+  input[type=color]{ width:100%; height:40px; border:1px solid var(--border); border-radius:9px; background:var(--bg-soft); padding:2px; cursor:pointer; }
+  input:focus, select:focus, textarea:focus{ border-color:var(--accent); }
+  textarea{ resize:vertical; min-height:110px; font-family:var(--font-mono); font-size:13.5px; line-height:1.55; }
+
+  .btn{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:9px;
+    padding:9px 16px; font-size:13.5px; font-weight:600; cursor:pointer; color:var(--text);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn-primary{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  .btn-primary:hover{ filter:brightness(1.08); }
+  .btn-danger{ color:var(--danger); }
+  .btn svg{ width:15px; height:15px; }
+  .btn-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .btn-group{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+  .btn-group .btn.active{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+
+  .result-box{
+    margin-top:16px; padding:16px; background:var(--bg-soft); border:1px solid var(--border);
+    border-radius:11px; font-family:var(--font-mono);
+  }
+  .result-big{ font-size:26px; font-weight:600; color:var(--accent); }
+  .result-label{ font-size:12px; color:var(--text-faint); font-family:var(--font-body); margin-bottom:3px; }
+  .result-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:14px; margin-top:6px;}
+  .error-box{ margin-top:12px; padding:11px 14px; background:rgba(255,107,122,0.1); border:1px solid var(--danger); color:var(--danger); border-radius:9px; font-size:13.5px; }
+  .hint{ font-size:12.5px; color:var(--text-faint); margin-top:8px; }
+
+  .tabs{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px; flex-wrap:wrap; }
+  .tab{ padding:9px 14px; font-size:13.5px; font-weight:600; color:var(--text-faint); cursor:pointer; border-bottom:2px solid transparent; }
+  .tab.active{ color:var(--accent); border-color:var(--accent); }
+
+  .related-row{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; }
+  .related-row .tool-card{ min-width:190px; flex-shrink:0; }
+
+  /* calculator keypad */
+  .calc-display{ background:var(--bg-soft); border:1px solid var(--border); border-radius:11px; padding:20px 16px; text-align:right; margin-bottom:12px; }
+  .calc-sub{ color:var(--text-faint); font-size:13px; font-family:var(--font-mono); min-height:16px; }
+  .calc-main{ font-size:32px; font-family:var(--font-mono); font-weight:600; word-break:break-all; }
+  .calc-pad{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .calc-key{ padding:15px 0; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); font-size:16px; font-weight:600; cursor:pointer; }
+  .calc-key:hover{ border-color:var(--accent); }
+  .calc-key.op{ color:var(--accent); }
+  .calc-key.eq{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  .calc-key.wide{ grid-column:span 2; }
+
+  .color-swatch{ width:100%; height:70px; border-radius:10px; border:1px solid var(--border); }
+  .palette-row{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .palette-swatch{ width:64px; text-align:center; cursor:pointer; }
+  .palette-swatch .sq{ width:64px; height:64px; border-radius:9px; border:1px solid var(--border); }
+  .palette-swatch .code{ font-size:10.5px; font-family:var(--font-mono); margin-top:4px; color:var(--text-dim); }
+
+  .ttt-board{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:280px; }
+  .ttt-cell{ aspect-ratio:1; background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; font-size:34px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:var(--font-display); }
+  .ttt-cell:hover{ border-color:var(--accent); }
+
+  .rps-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .rps-choice{ font-size:34px; padding:16px 20px; background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; cursor:pointer; }
+  .rps-choice:hover{ border-color:var(--accent); }
+
+  .quiz-q{ font-weight:600; font-size:16px; margin-bottom:14px; }
+  .quiz-opt{ display:block; width:100%; text-align:left; padding:11px 14px; margin-bottom:8px; border-radius:10px; background:var(--bg-soft); border:1px solid var(--border); cursor:pointer; font-size:14px; }
+  .quiz-opt:hover{ border-color:var(--accent); }
+  .quiz-opt.correct{ border-color:var(--success); background:rgba(53,208,140,0.12); }
+  .quiz-opt.wrong{ border-color:var(--danger); background:rgba(255,107,122,0.12); }
+
+  .list-box{ font-family:var(--font-mono); font-size:13px; background:var(--bg-soft); border:1px solid var(--border); border-radius:9px; padding:12px; max-height:220px; overflow-y:auto; margin-top:10px; }
+  .list-box div{ padding:4px 0; border-bottom:1px solid var(--border); }
+  .list-box div:last-child{ border-bottom:none; }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2); border:1px solid var(--border); padding:10px 18px; border-radius:10px;
+    font-size:13.5px; box-shadow:var(--shadow); z-index:200; opacity:0; transition:opacity .18s ease, transform .18s ease; pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .stat-strip{ display:flex; gap:22px; flex-wrap:wrap; margin-top:6px; }
+  .stat-strip div{ font-family:var(--font-mono); }
+  .stat-strip .n{ font-size:22px; font-weight:600; color:var(--accent); }
+  .stat-strip .l{ font-size:11.5px; color:var(--text-faint); font-family:var(--font-body); }
+
+  .type-sample{ font-family:var(--font-mono); font-size:16px; line-height:1.8; background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .type-sample span.correct{ color:var(--success); }
+  .type-sample span.wrong{ color:var(--danger); text-decoration:underline; }
+  .type-sample span.current{ background:var(--accent); color:var(--on-accent); border-radius:2px; }
+
+  .reaction-box{ height:220px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; cursor:pointer; user-select:none; }
+
+  @media (max-width:720px){
+    .topbar-inner{ flex-wrap:wrap; }
+    .searchwrap{ order:3; max-width:100%; width:100%; }
+    .brand-name{ display:none; }
+    .tool-grid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+    .cat-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="topbar-inner">
+    <div class="brand" onclick="navigate('#/')" role="button" tabindex="0" aria-label="SmartTools home">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--on-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <span class="brand-name">SmartTools</span>
+    </div>
+    <div class="searchwrap">
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" type="text" placeholder="Search tools — try 'percentage' or 'kg to pound'" autocomplete="off" aria-label="Search tools">
+        <button class="search-clear" id="searchClear" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme"></button>
+      <button class="icon-btn" onclick="navigate('#/dashboard')" aria-label="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="catnav" id="catnav" aria-label="Categories"></nav>
+</header>
+
+<main id="app"></main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tag">SmartTools — Calculate. Convert. Create. Learn. Play.</div>
+    <div class="footer-links">
+      <a href="#/" onclick="navigate('#/')">Home</a>
+      <a href="#/page/about" onclick="navigate('#/page/about')">About</a>
+      <a href="#/page/privacy" onclick="navigate('#/page/privacy')">Privacy</a>
+      <a href="#/page/terms" onclick="navigate('#/page/terms')">Terms</a>
+      <a href="#/page/contact" onclick="navigate('#/page/contact')">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   SMARTTOOLS — CORE APPLICATION
+   Sections: Config, Icons, State/Storage, Data (categories+tools),
+   Router, UI renderers, Tool implementations, Init
+   ========================================================= */
+
+/* ---------------- CONFIG ---------------- */
+const APP = { name:'SmartTools', recentsMax:14 };
+
+/* ---------------- ICONS (inline SVG path sets, stroke style) ---------------- */
+const ICON = {
+  calculators:'<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>',
+  converters:'<path d="M7 7h11l-3-3M17 17H6l3 3M7 7v10M17 17V7"/>',
+  text:'<path d="M4 6h16M4 12h10M4 18h7"/>',
+  numbers:'<path d="M4 9h16M4 15h16M9 4 7 20M17 4l-2 16"/>',
+  datetime:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  design:'<circle cx="12" cy="12" r="9"/><path d="M12 3a5 5 0 0 0 0 10 3 3 0 0 1 0 6 9 9 0 1 1 0-16Z"/>',
+  developer:'<path d="m8 9-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/>',
+  everyday:'<path d="M3 10 12 3l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z"/>',
+  random:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" stroke="none"/>',
+  brain:'<path d="M9 4a3 3 0 0 0-3 3v.3A3 3 0 0 0 4 10v1a3 3 0 0 0 1 2.2V15a3 3 0 0 0 3 3h1v2M15 4a3 3 0 0 1 3 3v.3A3 3 0 0 1 20 10v1a3 3 0 0 1-1 2.2V15a3 3 0 0 1-3 3h-1v2M9 4v16M15 4v16"/>',
+  games:'<rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v4M5 12h4M15.5 12h.01M18.5 10.5h.01"/>',
+  quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7M12 17h.01"/>',
+  star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2l-5-4.9 6.9-1L12 2Z"/>',
+  starFill:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2l-5-4.9 6.9-1L12 2Z" fill="currentColor"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/>',
+};
+function iconSvg(key, size=17){
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON[key]||ICON.calculators}</svg>`;
+}
+
+/* ---------------- STATE / STORAGE ---------------- */
+const Store = {
+  get(key, fallback){ try{ const v = localStorage.getItem(key); return v===null? fallback : JSON.parse(v); }catch(e){ return fallback; } },
+  set(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+};
+let favorites = new Set(Store.get('st_favorites', []));
+let recents = Store.get('st_recents', []);
+let bests = Store.get('st_bests', {});
+function saveFavorites(){ Store.set('st_favorites', [...favorites]); }
+function saveRecents(){ Store.set('st_recents', recents); }
+function saveBests(){ Store.set('st_bests', bests); }
+function toggleFavorite(id){
+  if(favorites.has(id)) favorites.delete(id); else favorites.add(id);
+  saveFavorites();
+}
+function pushRecent(id){
+  recents = recents.filter(r=>r!==id);
+  recents.unshift(id);
+  recents = recents.slice(0, APP.recentsMax);
+  saveRecents();
+}
+function getBest(id){ return bests[id]; }
+function setBest(id, val, higherIsBetter=true){
+  const cur = bests[id];
+  if(cur===undefined || (higherIsBetter? val>cur : val<cur)){ bests[id]=val; saveBests(); return true; }
+  return false;
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function copyText(str){
+  navigator.clipboard && navigator.clipboard.writeText(str).then(()=>toast('Copied to clipboard')).catch(()=>toast('Copy failed'));
+}
+
+/* ---------------- THEME ---------------- */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeToggle').innerHTML = iconSvg(t==='dark' ? 'sun' : 'moon');
+  Store.set('st_theme', t);
+}
+let currentTheme = Store.get('st_theme', window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+applyTheme(currentTheme);
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  currentTheme = currentTheme==='dark' ? 'light' : 'dark';
+  applyTheme(currentTheme);
+});
+
+/* ---------------- DATA: CATEGORIES ---------------- */
+const CATEGORIES = [
+  {id:'calculators', name:'Calculators', icon:'calculators', color:'#5B8CFF', desc:'Everyday and financial calculators that give accurate results instantly.'},
+  {id:'converters', name:'Converters', icon:'converters', color:'#35D08C', desc:'Convert between units of length, weight, temperature and more.'},
+  {id:'text', name:'Text Tools', icon:'text', color:'#F5B54C', desc:'Count, clean, reformat and transform any text.'},
+  {id:'numbers', name:'Number Tools', icon:'numbers', color:'#FF6B7A', desc:'Random numbers, passwords, base conversion and number checks.'},
+  {id:'datetime', name:'Date & Time', icon:'datetime', color:'#8C6BFF', desc:'Ages, countdowns, stopwatches and date arithmetic.'},
+  {id:'design', name:'Design & Color', icon:'design', color:'#4DD0E1', desc:'Color conversion, palettes and contrast checking.'},
+  {id:'developer', name:'Developer Tools', icon:'developer', color:'#9CCC65', desc:'JSON, Base64, URL encoding, UUIDs and timestamps.'},
+  {id:'everyday', name:'Everyday Tools', icon:'everyday', color:'#FFA45C', desc:'Split bills, plan trips and handle daily small math.'},
+  {id:'random', name:'Random & Decision', icon:'random', color:'#BA68C8', desc:'Spin wheels, pick teams and let chance decide.'},
+  {id:'brain', name:'Brain Training', icon:'brain', color:'#4FC3F7', desc:'Typing speed, reaction time and memory challenges.'},
+  {id:'games', name:'Mini Games', icon:'games', color:'#EF5DA8', desc:'Quick casual games for a short break.'},
+  {id:'quiz', name:'Quiz Center', icon:'quiz', color:'#FFD54F', desc:'Test your knowledge across fun categories.'},
+];
+function catInfo(id){ return CATEGORIES.find(c=>c.id===id); }
+
+/* ---------------- DATA: TOOLS ---------------- */
+/* Each tool: id, name, cat, desc, keywords[], render(container) */
+const TOOLS = [];
+function reg(t){ TOOLS.push(t); }
+
+/* ============ helper UI builders ============ */
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+function fieldHTML(id,label,type='number',extra=''){
+  return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" ${extra}></div>`;
+}
+function num(v){ const n = parseFloat(v); return isNaN(n) ? null : n; }
+function fmt(n, d=2){ if(n===null||n===undefined||isNaN(n)) return '—'; return Number(n.toFixed(d)).toLocaleString(); }
+
+/* =========================================================
+   CALCULATORS
+   ========================================================= */
+reg({id:'basic-calculator', name:'Basic Calculator', cat:'calculators', desc:'A fast everyday calculator with keyboard support.', keywords:['calculator','math','add','subtract'],
+  render(c){
+    c.innerHTML = `
+      <div class="calc-display">
+        <div class="calc-sub" id="calcSub">&nbsp;</div>
+        <div class="calc-main" id="calcMain">0</div>
+      </div>
+      <div class="calc-pad">
+        <button class="calc-key" data-k="C">C</button>
+        <button class="calc-key" data-k="back">⌫</button>
+        <button class="calc-key op" data-k="%">%</button>
+        <button class="calc-key op" data-k="/">÷</button>
+        <button class="calc-key" data-k="7">7</button><button class="calc-key" data-k="8">8</button><button class="calc-key" data-k="9">9</button>
+        <button class="calc-key op" data-k="*">×</button>
+        <button class="calc-key" data-k="4">4</button><button class="calc-key" data-k="5">5</button><button class="calc-key" data-k="6">6</button>
+        <button class="calc-key op" data-k="-">−</button>
+        <button class="calc-key" data-k="1">1</button><button class="calc-key" data-k="2">2</button><button class="calc-key" data-k="3">3</button>
+        <button class="calc-key op" data-k="+">+</button>
+        <button class="calc-key wide" data-k="0">0</button><button class="calc-key" data-k=".">.</button>
+        <button class="calc-key eq" data-k="=">=</button>
+      </div>`;
+    let expr = '';
+    const main = c.querySelector('#calcMain'), sub = c.querySelector('#calcSub');
+    function safeEval(e){
+      if(!/^[0-9+\-*/.%\s]+$/.test(e)) throw new Error('bad');
+      // eslint-disable-next-line no-new-func
+      return Function('"use strict";return ('+e.replace(/%/g,'/100')+')')();
+    }
+    function render(){ main.textContent = expr===''? '0': expr; }
+    c.querySelector('.calc-pad').addEventListener('click', ev=>{
+      const k = ev.target.dataset.k; if(!k) return;
+      if(k==='C'){ expr=''; sub.textContent='\u00a0'; }
+      else if(k==='back'){ expr = expr.slice(0,-1); }
+      else if(k==='='){
+        try{ const r = safeEval(expr); sub.textContent = expr+' ='; expr = String(r); }
+        catch(e){ sub.textContent='Error'; expr=''; }
+      } else { expr += k; }
+      render();
+    });
+    window.addEventListener('keydown', function kb(e){
+      if(!document.body.contains(c)){ window.removeEventListener('keydown', kb); return; }
+      if(/[0-9+\-*/.%]/.test(e.key)){ expr+=e.key; render(); }
+      else if(e.key==='Enter'||e.key==='='){ try{ const r=safeEval(expr); sub.textContent=expr+' ='; expr=String(r);}catch(err){sub.textContent='Error';expr='';} render(); }
+      else if(e.key==='Backspace'){ expr=expr.slice(0,-1); render(); }
+      else if(e.key==='Escape'){ expr=''; sub.textContent='\u00a0'; render(); }
+    });
+  }});
+
+reg({id:'percentage-calculator', name:'Percentage Calculator', cat:'calculators', desc:'Find X% of Y, what % X is of Y, or a percentage change.', keywords:['percent','percentage','%'],
+  render(c){
+    c.innerHTML = `
+      <div class="tabs">
+        <div class="tab active" data-t="0">X% of Y</div>
+        <div class="tab" data-t="1">X is what % of Y</div>
+        <div class="tab" data-t="2">% Change</div>
+      </div>
+      <div id="pcBody"></div>`;
+    const body = c.querySelector('#pcBody');
+    const views = [
+      ()=>`<div class="field-row">${fieldHTML('pX','Percentage (%)')}${fieldHTML('pY','Of value')}</div><button class="btn btn-primary" id="pcGo">Calculate</button><div id="pcOut"></div>`,
+      ()=>`<div class="field-row">${fieldHTML('pX','Value X')}${fieldHTML('pY','Total Y')}</div><button class="btn btn-primary" id="pcGo">Calculate</button><div id="pcOut"></div>`,
+      ()=>`<div class="field-row">${fieldHTML('pX','From value')}${fieldHTML('pY','To value')}</div><button class="btn btn-primary" id="pcGo">Calculate</button><div id="pcOut"></div>`,
+    ];
+    let mode = 0;
+    function draw(){
+      body.innerHTML = views[mode]();
+      body.querySelector('#pcGo').addEventListener('click', ()=>{
+        const x = num(body.querySelector('#pX').value), y = num(body.querySelector('#pY').value);
+        const out = body.querySelector('#pcOut');
+        if(x===null||y===null){ out.innerHTML = `<div class="error-box">Please enter valid numbers in both fields.</div>`; return; }
+        let res, label;
+        if(mode===0){ res = (x/100)*y; label = `${x}% of ${y} is`; }
+        else if(mode===1){ if(y===0){ out.innerHTML='<div class="error-box">Total cannot be zero.</div>'; return; } res = (x/y)*100; label = `${x} is this % of ${y}:`; }
+        else { if(x===0){ out.innerHTML='<div class="error-box">Starting value cannot be zero.</div>'; return; } res = ((y-x)/Math.abs(x))*100; label = `Change from ${x} to ${y}:`; }
+        out.innerHTML = `<div class="result-box"><div class="result-label">${label}</div><div class="result-big">${fmt(res)}${mode!==0?'%':''}</div></div>`;
+      });
+    }
+    c.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+      c.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+      mode = +t.dataset.t; draw();
+    }));
+    draw();
+  }});
+
+reg({id:'average-calculator', name:'Average Calculator', cat:'calculators', desc:'Get the average, sum, min, max of a list of numbers.', keywords:['average','mean','sum','statistics'],
+  render(c){
+    c.innerHTML = `
+      <div class="field"><label>Numbers (comma, space or newline separated)</label><textarea id="avgIn" placeholder="4, 8, 15, 16, 23, 42"></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="avgGo">Calculate</button></div>
+      <div id="avgOut"></div>`;
+    c.querySelector('#avgGo').addEventListener('click', ()=>{
+      const raw = c.querySelector('#avgIn').value.split(/[\s,]+/).filter(Boolean).map(Number);
+      const nums = raw.filter(n=>!isNaN(n));
+      const out = c.querySelector('#avgOut');
+      if(nums.length===0){ out.innerHTML = `<div class="error-box">Enter at least one valid number.</div>`; return; }
+      const sum = nums.reduce((a,b)=>a+b,0), avg = sum/nums.length;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Average</div><div class="result-big">${fmt(avg)}</div></div>
+        <div><div class="result-label">Sum</div><div class="result-big">${fmt(sum)}</div></div>
+        <div><div class="result-label">Count</div><div class="result-big">${nums.length}</div></div>
+        <div><div class="result-label">Min</div><div class="result-big">${fmt(Math.min(...nums))}</div></div>
+        <div><div class="result-label">Max</div><div class="result-big">${fmt(Math.max(...nums))}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'discount-calculator', name:'Discount Calculator', cat:'calculators', desc:'Work out the final price and savings after a discount.', keywords:['discount','sale','off','price'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('dPrice','Original price')}${fieldHTML('dPct','Discount %')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="dGo">Calculate</button></div><div id="dOut"></div>`;
+    c.querySelector('#dGo').addEventListener('click', ()=>{
+      const p = num(c.querySelector('#dPrice').value), pct = num(c.querySelector('#dPct').value);
+      const out = c.querySelector('#dOut');
+      if(p===null||pct===null||p<0||pct<0){ out.innerHTML=`<div class="error-box">Enter a valid non-negative price and percentage.</div>`; return; }
+      const savings = p*(pct/100), final = p-savings;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Final Price</div><div class="result-big">${fmt(final)}</div></div>
+        <div><div class="result-label">You Save</div><div class="result-big">${fmt(savings)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'tip-calculator', name:'Tip Calculator', cat:'calculators', desc:'Split a bill and tip fairly between any number of people.', keywords:['tip','bill','restaurant','split'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('tBill','Bill amount')}${fieldHTML('tPct','Tip %','number','value="10"')}${fieldHTML('tPeople','Number of people','number','value="1"')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="tGo">Calculate</button></div><div id="tOut"></div>`;
+    c.querySelector('#tGo').addEventListener('click', ()=>{
+      const bill=num(c.querySelector('#tBill').value), pct=num(c.querySelector('#tPct').value), people=num(c.querySelector('#tPeople').value)||1;
+      const out=c.querySelector('#tOut');
+      if(bill===null||pct===null||bill<0||pct<0||people<1){ out.innerHTML=`<div class="error-box">Enter a valid bill, tip % and at least 1 person.</div>`; return; }
+      const tip=bill*(pct/100), total=bill+tip;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Tip</div><div class="result-big">${fmt(tip)}</div></div>
+        <div><div class="result-label">Total</div><div class="result-big">${fmt(total)}</div></div>
+        <div><div class="result-label">Per Person</div><div class="result-big">${fmt(total/people)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'simple-interest-calculator', name:'Simple Interest Calculator', cat:'calculators', desc:'Calculate interest and total amount using simple interest.', keywords:['interest','loan','finance'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('siP','Principal')}${fieldHTML('siR','Annual rate %')}${fieldHTML('siT','Time (years)')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="siGo">Calculate</button></div><div id="siOut"></div>`;
+    c.querySelector('#siGo').addEventListener('click', ()=>{
+      const p=num(c.querySelector('#siP').value), r=num(c.querySelector('#siR').value), t=num(c.querySelector('#siT').value);
+      const out=c.querySelector('#siOut');
+      if(p===null||r===null||t===null||p<0||r<0||t<0){ out.innerHTML=`<div class="error-box">Enter valid non-negative values.</div>`; return; }
+      const interest = p*r*t/100, total = p+interest;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Interest</div><div class="result-big">${fmt(interest)}</div></div>
+        <div><div class="result-label">Total Amount</div><div class="result-big">${fmt(total)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'compound-interest-calculator', name:'Compound Interest Calculator', cat:'calculators', desc:'See how an investment grows with compound interest.', keywords:['compound','interest','investment'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('ciP','Principal')}${fieldHTML('ciR','Annual rate %')}${fieldHTML('ciT','Time (years)')}
+      <div class="field"><label>Compounds per year</label><select id="ciN"><option value="1">Annually</option><option value="2">Semi-annually</option><option value="4">Quarterly</option><option value="12" selected>Monthly</option><option value="365">Daily</option></select></div></div>
+      <div class="btn-row"><button class="btn btn-primary" id="ciGo">Calculate</button></div><div id="ciOut"></div>`;
+    c.querySelector('#ciGo').addEventListener('click', ()=>{
+      const p=num(c.querySelector('#ciP').value), r=num(c.querySelector('#ciR').value), t=num(c.querySelector('#ciT').value), n=num(c.querySelector('#ciN').value);
+      const out=c.querySelector('#ciOut');
+      if(p===null||r===null||t===null||p<0||r<0||t<0){ out.innerHTML=`<div class="error-box">Enter valid non-negative values.</div>`; return; }
+      const amount = p*Math.pow(1+(r/100)/n, n*t), interest = amount-p;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Final Amount</div><div class="result-big">${fmt(amount)}</div></div>
+        <div><div class="result-label">Interest Earned</div><div class="result-big">${fmt(interest)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'loan-emi-calculator', name:'Loan / EMI Calculator', cat:'calculators', desc:'Calculate monthly loan payments (EMI) and total interest.', keywords:['loan','emi','mortgage'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('lP','Loan amount')}${fieldHTML('lR','Annual interest rate %')}${fieldHTML('lM','Tenure (months)')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="lGo">Calculate</button></div><div id="lOut"></div>`;
+    c.querySelector('#lGo').addEventListener('click', ()=>{
+      const p=num(c.querySelector('#lP').value), r=num(c.querySelector('#lR').value), m=num(c.querySelector('#lM').value);
+      const out=c.querySelector('#lOut');
+      if(p===null||r===null||m===null||p<=0||r<0||m<=0){ out.innerHTML=`<div class="error-box">Enter a valid loan amount, rate, and tenure in months.</div>`; return; }
+      const mr = r/12/100;
+      let emi;
+      if(mr===0){ emi = p/m; } else { emi = p*mr*Math.pow(1+mr,m)/(Math.pow(1+mr,m)-1); }
+      const total = emi*m, interest = total-p;
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Monthly EMI</div><div class="result-big">${fmt(emi)}</div></div>
+        <div><div class="result-label">Total Payment</div><div class="result-big">${fmt(total)}</div></div>
+        <div><div class="result-label">Total Interest</div><div class="result-big">${fmt(interest)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'age-calculator', name:'Age Calculator', cat:'calculators', desc:'Find exact age in years, months and days, and days to next birthday.', keywords:['age','birthday','date of birth'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('ageD','Date of birth','date')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="ageGo">Calculate Age</button></div><div id="ageOut"></div>`;
+    c.querySelector('#ageGo').addEventListener('click', ()=>{
+      const val = c.querySelector('#ageD').value;
+      const out = c.querySelector('#ageOut');
+      if(!val){ out.innerHTML=`<div class="error-box">Please choose a date of birth.</div>`; return; }
+      const dob = new Date(val+'T00:00:00'); const now = new Date();
+      if(dob>now){ out.innerHTML=`<div class="error-box">Date of birth can't be in the future.</div>`; return; }
+      let y = now.getFullYear()-dob.getFullYear(), m = now.getMonth()-dob.getMonth(), d = now.getDate()-dob.getDate();
+      if(d<0){ m--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+      if(m<0){ y--; m+=12; }
+      const next = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+      if(next<now) next.setFullYear(next.getFullYear()+1);
+      const daysToNext = Math.ceil((next-now)/86400000);
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Age</div><div class="result-big">${y}y ${m}m ${d}d</div></div>
+        <div><div class="result-label">Days to next birthday</div><div class="result-big">${daysToNext}</div></div>
+      </div></div>`;
+    });
+  }});
+
+reg({id:'date-difference-calculator', name:'Date Difference Calculator', cat:'calculators', desc:'Find the days, weeks, months and years between two dates.', keywords:['date','difference','days between'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('d1','From date','date')}${fieldHTML('d2','To date','date')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="ddGo">Calculate</button></div><div id="ddOut"></div>`;
+    c.querySelector('#ddGo').addEventListener('click', ()=>{
+      const a=c.querySelector('#d1').value, b=c.querySelector('#d2').value;
+      const out = c.querySelector('#ddOut');
+      if(!a||!b){ out.innerHTML=`<div class="error-box">Please choose both dates.</div>`; return; }
+      const d1=new Date(a+'T00:00:00'), d2=new Date(b+'T00:00:00');
+      const diffDays = Math.round((d2-d1)/86400000);
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Days</div><div class="result-big">${diffDays}</div></div>
+        <div><div class="result-label">Weeks</div><div class="result-big">${fmt(diffDays/7,1)}</div></div>
+        <div><div class="result-label">Months (approx)</div><div class="result-big">${fmt(diffDays/30.44,1)}</div></div>
+        <div><div class="result-label">Years (approx)</div><div class="result-big">${fmt(diffDays/365.25,2)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+/* =========================================================
+   CONVERTERS
+   ========================================================= */
+const UNIT_DATA = {
+  length: {label:'Length', base:'m', units:{ m:1, km:1000, cm:0.01, mm:0.001, mi:1609.344, yd:0.9144, ft:0.3048, in:0.0254, nmi:1852 }},
+  weight: {label:'Weight', base:'kg', units:{ kg:1, g:0.001, mg:0.000001, ton:1000, lb:0.45359237, oz:0.028349523125, st:6.35029318 }},
+  area: {label:'Area', base:'sqm', units:{ sqm:1, sqkm:1e6, sqft:0.09290304, sqyd:0.83612736, acre:4046.8564224, hectare:10000, sqmi:2589988.110336 }},
+  volume: {label:'Volume', base:'l', units:{ l:1, ml:0.001, m3:1000, gal_us:3.785411784, qt_us:0.946352946, pt_us:0.473176473, cup_us:0.2365882365, floz_us:0.0295735295625 }},
+  speed: {label:'Speed', base:'ms', units:{ ms:1, kmh:0.277777778, mph:0.44704, knot:0.514444444, fts:0.3048 }},
+  time: {label:'Time', base:'s', units:{ s:1, min:60, hr:3600, day:86400, week:604800, month:2629800, year:31557600 }},
+  data: {label:'Data Storage', base:'byte', units:{ byte:1, kb:1024, mb:1024**2, gb:1024**3, tb:1024**4, bit:0.125 }},
+  pressure: {label:'Pressure', base:'pa', units:{ pa:1, kpa:1000, bar:100000, atm:101325, psi:6894.757293168, mmhg:133.322387415 }},
+  energy: {label:'Energy', base:'j', units:{ j:1, kj:1000, cal:4.184, kcal:4184, wh:3600, kwh:3600000 }},
+  power: {label:'Power', base:'w', units:{ w:1, kw:1000, hp:745.699871582, mw:1000000 }},
+  angle: {label:'Angle', base:'deg', units:{ deg:1, rad:57.29577951308232, grad:0.9, turn:360 }},
+};
+function convertUnit(cat, from, to, val){
+  if(cat==='temperature'){
+    let c;
+    if(from==='c') c=val; else if(from==='f') c=(val-32)*5/9; else c=val-273.15;
+    if(to==='c') return c; if(to==='f') return c*9/5+32; return c+273.15;
+  }
+  const data = UNIT_DATA[cat];
+  const base = val*data.units[from];
+  return base/data.units[to];
+}
+reg({id:'unit-converter', name:'Unit Converter', cat:'converters', desc:'Convert length, weight, temperature, area, volume, speed, time, data, pressure, energy, power and angle.', keywords:['convert','unit','length','weight','temperature','kg','pound','km','miles','celsius','fahrenheit'],
+  render(c){
+    const cats = [['temperature','Temperature'],...Object.keys(UNIT_DATA).map(k=>[k,UNIT_DATA[k].label])];
+    c.innerHTML = `
+      <div class="field"><label>Category</label><select id="ucCat">${cats.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div>
+      <div class="field-row" style="margin-top:12px">
+        <div class="field"><label>From</label><select id="ucFrom"></select></div>
+        <div class="field"><label style="opacity:0">swap</label><button class="btn" id="ucSwap" style="width:100%">⇄ Swap</button></div>
+        <div class="field"><label>To</label><select id="ucTo"></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field">${fieldHTML('ucVal','Value','number','value="1"')}</div>
+      </div>
+      <div id="ucOut"></div>`;
+    const catSel = c.querySelector('#ucCat'), fromSel=c.querySelector('#ucFrom'), toSel=c.querySelector('#ucTo'), valIn=c.querySelector('#ucVal'), out=c.querySelector('#ucOut');
+    function unitList(cat){
+      if(cat==='temperature') return [['c','Celsius'],['f','Fahrenheit'],['k','Kelvin']];
+      return Object.keys(UNIT_DATA[cat].units).map(u=>[u,u.toUpperCase()]);
+    }
+    function populate(){
+      const cat = catSel.value; const list = unitList(cat);
+      fromSel.innerHTML = list.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+      toSel.innerHTML = list.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+      if(list[1]) toSel.value = list[1][0];
+      compute();
+    }
+    function compute(){
+      const v = num(valIn.value);
+      if(v===null){ out.innerHTML = `<div class="error-box">Enter a valid number.</div>`; return; }
+      const r = convertUnit(catSel.value, fromSel.value, toSel.value, v);
+      out.innerHTML = `<div class="result-box"><div class="result-label">Result</div><div class="result-big">${fmt(r,6)}</div></div>`;
+    }
+    catSel.addEventListener('change', populate);
+    [fromSel,toSel,valIn].forEach(elm=>elm.addEventListener('input', compute));
+    c.querySelector('#ucSwap').addEventListener('click', ()=>{ const f=fromSel.value; fromSel.value=toSel.value; toSel.value=f; compute(); });
+    populate();
+  }});
+
+/* =========================================================
+   TEXT TOOLS
+   ========================================================= */
+reg({id:'word-counter', name:'Word Counter', cat:'text', desc:'Count words, characters, sentences, paragraphs and reading time.', keywords:['word count','character count','reading time'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Your text</label><textarea id="wcIn" placeholder="Paste or type text here..." style="min-height:180px"></textarea></div><div id="wcOut"></div>`;
+    const inp = c.querySelector('#wcIn'), out = c.querySelector('#wcOut');
+    function update(){
+      const text = inp.value;
+      const words = (text.match(/\S+/g)||[]).length;
+      const chars = text.length, charsNoSpace = text.replace(/\s/g,'').length;
+      const sentences = (text.match(/[.!?]+(\s|$)/g)||[]).length || (text.trim()?1:0);
+      const paragraphs = text.split(/\n\s*\n/).filter(p=>p.trim()).length || (text.trim()?1:0);
+      const readMin = Math.max(1, Math.round(words/200));
+      out.innerHTML = `<div class="result-box"><div class="stat-strip">
+        <div><div class="n">${words}</div><div class="l">Words</div></div>
+        <div><div class="n">${chars}</div><div class="l">Characters</div></div>
+        <div><div class="n">${charsNoSpace}</div><div class="l">Chars (no space)</div></div>
+        <div><div class="n">${sentences}</div><div class="l">Sentences</div></div>
+        <div><div class="n">${paragraphs}</div><div class="l">Paragraphs</div></div>
+        <div><div class="n">${words? readMin:0}</div><div class="l">Min read</div></div>
+      </div></div>`;
+    }
+    inp.addEventListener('input', update); update();
+  }});
+
+reg({id:'case-converter', name:'Case Converter', cat:'text', desc:'Convert text to UPPERCASE, lowercase, Title Case or Sentence case.', keywords:['uppercase','lowercase','title case','sentence case'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Text</label><textarea id="ccIn" placeholder="Type text here..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn" data-m="upper">UPPERCASE</button>
+        <button class="btn" data-m="lower">lowercase</button>
+        <button class="btn" data-m="title">Title Case</button>
+        <button class="btn" data-m="sentence">Sentence case</button>
+        <button class="btn" data-m="reverse">Reverse</button>
+        <button class="btn" id="ccCopy">${iconSvg('copy',15)} Copy</button>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Result</label><textarea id="ccOut" readonly></textarea></div>`;
+    const inp=c.querySelector('#ccIn'), out=c.querySelector('#ccOut');
+    c.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click', ()=>{
+      const t = inp.value, m = b.dataset.m;
+      let r = t;
+      if(m==='upper') r=t.toUpperCase();
+      else if(m==='lower') r=t.toLowerCase();
+      else if(m==='title') r=t.replace(/\w\S*/g, w=>w[0].toUpperCase()+w.slice(1).toLowerCase());
+      else if(m==='sentence') r=t.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, s=>s.toUpperCase());
+      else if(m==='reverse') r=t.split('').reverse().join('');
+      out.value = r;
+    }));
+    c.querySelector('#ccCopy').addEventListener('click', ()=>copyText(out.value));
+  }});
+
+reg({id:'text-cleaner', name:'Text Cleaner & Line Tools', cat:'text', desc:'Remove extra spaces, remove duplicate lines, and sort lines.', keywords:['remove spaces','duplicate lines','sort lines','clean text'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Text</label><textarea id="tcIn" style="min-height:150px" placeholder="One item per line, or any text..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn" data-a="trim">Remove Extra Spaces</button>
+        <button class="btn" data-a="dedupe">Remove Duplicate Lines</button>
+        <button class="btn" data-a="sortasc">Sort A→Z</button>
+        <button class="btn" data-a="sortdesc">Sort Z→A</button>
+        <button class="btn" id="tcCopy">${iconSvg('copy',15)} Copy</button>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Result</label><textarea id="tcOut" style="min-height:150px" readonly></textarea></div>`;
+    const inp=c.querySelector('#tcIn'), out=c.querySelector('#tcOut');
+    c.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click', ()=>{
+      let lines = inp.value.split('\n');
+      const a = b.dataset.a;
+      if(a==='trim') out.value = inp.value.replace(/[ \t]+/g,' ').split('\n').map(l=>l.trim()).join('\n').replace(/\n{3,}/g,'\n\n');
+      else if(a==='dedupe') out.value = [...new Set(lines)].join('\n');
+      else if(a==='sortasc') out.value = [...lines].sort((x,y)=>x.localeCompare(y)).join('\n');
+      else if(a==='sortdesc') out.value = [...lines].sort((x,y)=>y.localeCompare(x)).join('\n');
+    }));
+    c.querySelector('#tcCopy').addEventListener('click', ()=>copyText(out.value));
+  }});
+
+reg({id:'find-replace', name:'Find & Replace', cat:'text', desc:'Find and replace text, with optional case sensitivity.', keywords:['find','replace','search text'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Text</label><textarea id="frText" style="min-height:150px"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Find</label><input id="frFind" type="text"></div>
+        <div class="field"><label>Replace with</label><input id="frReplace" type="text"></div>
+      </div>
+      <label style="font-size:13px;display:flex;gap:7px;align-items:center;margin-bottom:10px"><input type="checkbox" id="frCase"> Case sensitive</label>
+      <div class="btn-row"><button class="btn btn-primary" id="frGo">Replace All</button><button class="btn" id="frCopy">${iconSvg('copy',15)} Copy Result</button></div>
+      <div class="field" style="margin-top:12px"><label>Result</label><textarea id="frOut" style="min-height:150px" readonly></textarea></div>`;
+    c.querySelector('#frGo').addEventListener('click', ()=>{
+      const text = c.querySelector('#frText').value, find = c.querySelector('#frFind').value;
+      const rep = c.querySelector('#frReplace').value, ci = !c.querySelector('#frCase').checked;
+      const out = c.querySelector('#frOut');
+      if(!find){ out.value = text; return; }
+      const esc = find.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      out.value = text.replace(new RegExp(esc, 'g'+(ci?'i':'')), rep);
+    });
+    c.querySelector('#frCopy').addEventListener('click', ()=>copyText(c.querySelector('#frOut').value));
+  }});
+
+reg({id:'lorem-ipsum-generator', name:'Lorem Ipsum Generator', cat:'text', desc:'Generate placeholder paragraphs, sentences or words.', keywords:['lorem ipsum','placeholder text','dummy text'],
+  render(c){
+    const words = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat".split(' ');
+    c.innerHTML = `<div class="field-row">
+        <div class="field"><label>Type</label><select id="liType"><option value="p">Paragraphs</option><option value="s">Sentences</option><option value="w">Words</option></select></div>
+        <div class="field">${fieldHTML('liCount','Count','number','value="3"')}</div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="liGo">Generate</button><button class="btn" id="liCopy">${iconSvg('copy',15)} Copy</button></div>
+      <div class="field" style="margin-top:12px"><textarea id="liOut" style="min-height:170px"></textarea></div>`;
+    function randWord(){ return words[Math.floor(Math.random()*words.length)]; }
+    function sentence(){ const n=5+Math.floor(Math.random()*8); let s=[]; for(let i=0;i<n;i++)s.push(randWord()); s[0]=s[0][0].toUpperCase()+s[0].slice(1); return s.join(' ')+'.'; }
+    function paragraph(){ const n=3+Math.floor(Math.random()*4); let s=[]; for(let i=0;i<n;i++)s.push(sentence()); return s.join(' '); }
+    c.querySelector('#liGo').addEventListener('click', ()=>{
+      const type = c.querySelector('#liType').value, count = Math.max(1, num(c.querySelector('#liCount').value)||3);
+      let res=[];
+      if(type==='p') for(let i=0;i<count;i++) res.push(paragraph());
+      else if(type==='s') for(let i=0;i<count;i++) res.push(sentence());
+      else { let w=[]; for(let i=0;i<count;i++) w.push(randWord()); res=[w.join(' ')]; }
+      c.querySelector('#liOut').value = res.join('\n\n');
+    });
+    c.querySelector('#liCopy').addEventListener('click', ()=>copyText(c.querySelector('#liOut').value));
+  }});
+
+/* =========================================================
+   NUMBER TOOLS
+   ========================================================= */
+reg({id:'random-number-generator', name:'Random Number Generator', cat:'numbers', desc:'Generate a random number in any range, with history.', keywords:['random number','dice','rng'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('rnMin','Min','number','value="1"')}${fieldHTML('rnMax','Max','number','value="100"')}
+      <div class="field"><label style="opacity:0">go</label><button class="btn btn-primary" id="rnGo" style="width:100%">Generate</button></div></div>
+      <div id="rnOut"></div><div class="list-box" id="rnHist" style="display:none"></div>`;
+    let hist = [];
+    c.querySelector('#rnGo').addEventListener('click', ()=>{
+      const min = num(c.querySelector('#rnMin').value), max = num(c.querySelector('#rnMax').value);
+      const out = c.querySelector('#rnOut');
+      if(min===null||max===null||min>max){ out.innerHTML = `<div class="error-box">Min must be less than or equal to Max.</div>`; return; }
+      const r = Math.floor(Math.random()*(max-min+1))+min;
+      out.innerHTML = `<div class="result-box"><div class="result-label">Result</div><div class="result-big">${r}</div></div>`;
+      hist.unshift(r); hist = hist.slice(0,10);
+      const hb = c.querySelector('#rnHist'); hb.style.display='block';
+      hb.innerHTML = hist.map(h=>`<div>${h}</div>`).join('');
+    });
+  }});
+
+reg({id:'random-password-generator', name:'Random Password Generator', cat:'numbers', desc:'Generate a strong random password with custom rules.', keywords:['password','generator','security'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('ppLen','Length','number','value="16" min="4" max="64"')}</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:13.5px">
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="ppUpper" checked> Uppercase</label>
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="ppLower" checked> Lowercase</label>
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="ppNum" checked> Numbers</label>
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="ppSym" checked> Symbols</label>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="ppGo">Generate</button><button class="btn" id="ppCopy">${iconSvg('copy',15)} Copy</button></div>
+      <div class="result-box"><div class="result-big" id="ppOut" style="word-break:break-all">—</div></div>
+      <div class="hint" id="ppStrength"></div>`;
+    function generate(){
+      const len = Math.min(64, Math.max(4, num(c.querySelector('#ppLen').value)||16));
+      let chars = '';
+      if(c.querySelector('#ppUpper').checked) chars += 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+      if(c.querySelector('#ppLower').checked) chars += 'abcdefghijkmnpqrstuvwxyz';
+      if(c.querySelector('#ppNum').checked) chars += '23456789';
+      if(c.querySelector('#ppSym').checked) chars += '!@#$%^&*()-_=+[]{}';
+      if(!chars){ c.querySelector('#ppOut').textContent='Select at least one option'; return; }
+      const arr = new Uint32Array(len); crypto.getRandomValues(arr);
+      let pw=''; for(let i=0;i<len;i++) pw += chars[arr[i]%chars.length];
+      c.querySelector('#ppOut').textContent = pw;
+      let score = 0;
+      if(len>=12) score++; if(len>=16) score++;
+      if(c.querySelector('#ppUpper').checked && c.querySelector('#ppLower').checked) score++;
+      if(c.querySelector('#ppNum').checked) score++;
+      if(c.querySelector('#ppSym').checked) score++;
+      const labels = ['Very weak','Weak','Fair','Good','Strong','Very strong'];
+      c.querySelector('#ppStrength').textContent = 'Strength: ' + labels[Math.min(score, labels.length-1)];
+    }
+    c.querySelector('#ppGo').addEventListener('click', generate);
+    c.querySelector('#ppCopy').addEventListener('click', ()=>copyText(c.querySelector('#ppOut').textContent));
+    generate();
+  }});
+
+reg({id:'prime-gcd-lcm', name:'Prime / GCD / LCM Checker', cat:'numbers', desc:'Check if a number is prime, or find the GCD and LCM of two numbers.', keywords:['prime','gcd','lcm','factor'],
+  render(c){
+    c.innerHTML = `<div class="tabs"><div class="tab active" data-t="0">Prime Check</div><div class="tab" data-t="1">GCD & LCM</div></div><div id="pgBody"></div>`;
+    const body = c.querySelector('#pgBody');
+    function isPrime(n){ if(n<2) return false; for(let i=2;i*i<=n;i++) if(n%i===0) return false; return true; }
+    function gcd(a,b){ return b===0?a:gcd(b,a%b); }
+    function draw(mode){
+      if(mode===0){
+        body.innerHTML = `<div class="field-row">${fieldHTML('pgN','Number')}</div><button class="btn btn-primary" id="pgGo">Check</button><div id="pgOut"></div>`;
+        body.querySelector('#pgGo').addEventListener('click', ()=>{
+          const n = num(body.querySelector('#pgN').value); const out = body.querySelector('#pgOut');
+          if(n===null || !Number.isInteger(n) || n<0){ out.innerHTML = `<div class="error-box">Enter a valid whole number.</div>`; return; }
+          out.innerHTML = `<div class="result-box"><div class="result-big">${n} is ${isPrime(n)?'a Prime number ✓':'not a Prime number'}</div></div>`;
+        });
+      } else {
+        body.innerHTML = `<div class="field-row">${fieldHTML('gA','Number A')}${fieldHTML('gB','Number B')}</div><button class="btn btn-primary" id="gGo">Calculate</button><div id="gOut"></div>`;
+        body.querySelector('#gGo').addEventListener('click', ()=>{
+          const a = num(body.querySelector('#gA').value), b = num(body.querySelector('#gB').value); const out = body.querySelector('#gOut');
+          if(a===null||b===null||!Number.isInteger(a)||!Number.isInteger(b)||a<=0||b<=0){ out.innerHTML=`<div class="error-box">Enter two positive whole numbers.</div>`; return; }
+          const g = gcd(a,b), l = (a*b)/g;
+          out.innerHTML = `<div class="result-box"><div class="result-grid"><div><div class="result-label">GCD</div><div class="result-big">${g}</div></div><div><div class="result-label">LCM</div><div class="result-big">${l}</div></div></div></div>`;
+        });
+      }
+    }
+    c.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{ c.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); draw(+t.dataset.t); }));
+    draw(0);
+  }});
+
+reg({id:'base-converter', name:'Number Base Converter', cat:'numbers', desc:'Convert numbers between binary, octal, decimal and hexadecimal.', keywords:['binary','hex','octal','decimal','base converter'],
+  render(c){
+    c.innerHTML = `<div class="field-row">
+        <div class="field"><label>From base</label><select id="bcFrom"><option value="2">Binary</option><option value="8">Octal</option><option value="10" selected>Decimal</option><option value="16">Hexadecimal</option></select></div>
+        <div class="field"><label>Value</label><input id="bcVal" type="text" value="42"></div>
+      </div><div id="bcOut"></div>`;
+    function update(){
+      const base = +c.querySelector('#bcFrom').value, val = c.querySelector('#bcVal').value.trim();
+      const out = c.querySelector('#bcOut');
+      const n = parseInt(val, base);
+      if(isNaN(n) || n<0){ out.innerHTML = `<div class="error-box">Enter a valid number in the selected base.</div>`; return; }
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Binary</div><div class="result-big" style="font-size:16px">${n.toString(2)}</div></div>
+        <div><div class="result-label">Octal</div><div class="result-big" style="font-size:16px">${n.toString(8)}</div></div>
+        <div><div class="result-label">Decimal</div><div class="result-big" style="font-size:16px">${n.toString(10)}</div></div>
+        <div><div class="result-label">Hexadecimal</div><div class="result-big" style="font-size:16px">${n.toString(16).toUpperCase()}</div></div>
+      </div></div>`;
+    }
+    c.querySelector('#bcFrom').addEventListener('change', update);
+    c.querySelector('#bcVal').addEventListener('input', update);
+    update();
+  }});
+
+/* =========================================================
+   DATE & TIME
+   ========================================================= */
+reg({id:'countdown-timer', name:'Countdown Timer', cat:'datetime', desc:'Count down to any future date and time.', keywords:['countdown','timer','event'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('cdWhen','Target date & time','datetime-local')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="cdGo">Start Countdown</button><button class="btn" id="cdStop">Stop</button></div>
+      <div class="result-box" id="cdOut" style="display:none"></div>`;
+    let iv=null;
+    function tick(target){
+      const diff = target - Date.now();
+      const out = c.querySelector('#cdOut');
+      if(diff<=0){ out.innerHTML = `<div class="result-big">Time's up! 🎉</div>`; clearInterval(iv); return; }
+      const d = Math.floor(diff/86400000), h=Math.floor(diff/3600000)%24, m=Math.floor(diff/60000)%60, s=Math.floor(diff/1000)%60;
+      out.innerHTML = `<div class="stat-strip">
+        <div><div class="n">${d}</div><div class="l">Days</div></div>
+        <div><div class="n">${h}</div><div class="l">Hours</div></div>
+        <div><div class="n">${m}</div><div class="l">Minutes</div></div>
+        <div><div class="n">${s}</div><div class="l">Seconds</div></div>
+      </div>`;
+    }
+    c.querySelector('#cdGo').addEventListener('click', ()=>{
+      const val = c.querySelector('#cdWhen').value;
+      if(!val){ toast('Choose a target date and time'); return; }
+      const target = new Date(val).getTime();
+      clearInterval(iv);
+      c.querySelector('#cdOut').style.display='block';
+      tick(target); iv = setInterval(()=>tick(target), 1000);
+    });
+    c.querySelector('#cdStop').addEventListener('click', ()=>clearInterval(iv));
+  }});
+
+reg({id:'stopwatch', name:'Stopwatch', cat:'datetime', desc:'A precise stopwatch with lap tracking.', keywords:['stopwatch','timer','laps'],
+  render(c){
+    c.innerHTML = `<div class="calc-display" style="text-align:center"><div class="calc-main" id="swMain">00:00.00</div></div>
+      <div class="btn-row"><button class="btn btn-primary" id="swStart">Start</button><button class="btn" id="swLap">Lap</button><button class="btn btn-danger" id="swReset">Reset</button></div>
+      <div class="list-box" id="swLaps" style="display:none"></div>`;
+    let running=false, startTs=0, elapsed=0, raf=null, laps=[];
+    function fmt2(ms){ const m=Math.floor(ms/60000), s=Math.floor(ms/1000)%60, cs=Math.floor(ms/10)%100;
+      return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(cs).padStart(2,'0'); }
+    function loop(){ if(!running) return; const now = elapsed + (Date.now()-startTs); c.querySelector('#swMain').textContent = fmt2(now); raf = requestAnimationFrame(loop); }
+    c.querySelector('#swStart').addEventListener('click', (e)=>{
+      if(!running){ running=true; startTs=Date.now(); loop(); e.target.textContent='Pause'; }
+      else { running=false; elapsed += Date.now()-startTs; cancelAnimationFrame(raf); e.target.textContent='Resume'; }
+    });
+    c.querySelector('#swLap').addEventListener('click', ()=>{
+      const now = running ? elapsed+(Date.now()-startTs) : elapsed;
+      laps.unshift(fmt2(now)); const lb=c.querySelector('#swLaps'); lb.style.display='block';
+      lb.innerHTML = laps.map((l,i)=>`<div>Lap ${laps.length-i}: ${l}</div>`).join('');
+    });
+    c.querySelector('#swReset').addEventListener('click', ()=>{
+      running=false; elapsed=0; laps=[]; cancelAnimationFrame(raf);
+      c.querySelector('#swMain').textContent='00:00.00';
+      c.querySelector('#swStart').textContent='Start';
+      c.querySelector('#swLaps').style.display='none';
+    });
+  }});
+
+reg({id:'date-facts', name:'Date Facts (Leap Year & Week Number)', cat:'datetime', desc:'Check leap years, get the ISO week number and day-of-year for any date.', keywords:['leap year','week number','day of year'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('dfDate','Pick a date','date')}</div><div id="dfOut"></div>`;
+    function update(){
+      const val = c.querySelector('#dfDate').value, out = c.querySelector('#dfOut');
+      if(!val){ out.innerHTML=''; return; }
+      const d = new Date(val+'T00:00:00');
+      const y = d.getFullYear();
+      const isLeap = (y%4===0 && y%100!==0) || y%400===0;
+      const start = new Date(y,0,1);
+      const dayOfYear = Math.floor((d-start)/86400000)+1;
+      const target = new Date(d); target.setDate(target.getDate()+3-((target.getDay()+6)%7));
+      const week1 = new Date(target.getFullYear(),0,4);
+      const weekNo = 1+Math.round(((target-week1)/86400000-3+((week1.getDay()+6)%7))/7);
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Leap year?</div><div class="result-big">${isLeap?'Yes':'No'}</div></div>
+        <div><div class="result-label">Day of year</div><div class="result-big">${dayOfYear}</div></div>
+        <div><div class="result-label">ISO Week</div><div class="result-big">${weekNo}</div></div>
+      </div></div>`;
+    }
+    c.querySelector('#dfDate').addEventListener('input', update);
+  }});
+
+/* =========================================================
+   DESIGN & COLOR
+   ========================================================= */
+function hexToRgb(hex){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(h=>h+h).join('');
+  const n = parseInt(hex,16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=>Math.round(x).toString(16).padStart(2,'0')).join(''); }
+function rgbToHsl(r,g,b){ r/=255;g/=255;b/=255; const max=Math.max(r,g,b),min=Math.min(r,g,b); let h,s,l=(max+min)/2;
+  if(max===min){h=s=0;} else { const d=max-min; s=l>0.5? d/(2-max-min): d/(max+min);
+    switch(max){ case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; default: h=(r-g)/d+4; } h/=6; }
+  return [Math.round(h*360), Math.round(s*100), Math.round(l*100)]; }
+function hslToRgb(h,s,l){ h/=360; s/=100; l/=100; let r,g,b;
+  if(s===0){ r=g=b=l; } else { const hue2rgb=(p,q,t)=>{ if(t<0)t+=1; if(t>1)t-=1; if(t<1/6) return p+(q-p)*6*t; if(t<1/2) return q; if(t<2/3) return p+(q-p)*(2/3-t)*6; return p; };
+    const q = l<0.5? l*(1+s) : l+s-l*s; const p = 2*l-q; r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3); }
+  return [r*255,g*255,b*255]; }
+
+reg({id:'color-converter', name:'Color Converter', cat:'design', desc:'Convert between HEX, RGB and HSL color formats with a live preview.', keywords:['color','hex','rgb','hsl'],
+  render(c){
+    c.innerHTML = `<div class="field-row">
+        <div class="field"><label>Pick a color</label><input type="color" id="colPick" value="#5b8cff"></div>
+        <div class="field"><label>HEX</label><input type="text" id="colHex" value="#5b8cff"></div>
+      </div>
+      <div class="color-swatch" id="colSwatch" style="background:#5b8cff;margin-bottom:14px"></div>
+      <div class="result-box"><div class="result-grid" id="colOut"></div></div>`;
+    const pick=c.querySelector('#colPick'), hexIn=c.querySelector('#colHex'), sw=c.querySelector('#colSwatch'), out=c.querySelector('#colOut');
+    function update(hex){
+      if(!/^#?[0-9a-f]{3}([0-9a-f]{3})?$/i.test(hex)){ out.innerHTML = `<div class="error-box">Enter a valid hex color like #5B8CFF.</div>`; return; }
+      if(!hex.startsWith('#')) hex='#'+hex;
+      const [r,g,b] = hexToRgb(hex); const [h,s,l] = rgbToHsl(r,g,b);
+      sw.style.background = hex; pick.value = hex.length===4? rgbToHex(r,g,b): hex;
+      out.innerHTML = `<div><div class="result-label">HEX</div><div class="result-big" style="font-size:16px">${hex.toUpperCase()}</div></div>
+        <div><div class="result-label">RGB</div><div class="result-big" style="font-size:16px">${r}, ${g}, ${b}</div></div>
+        <div><div class="result-label">HSL</div><div class="result-big" style="font-size:16px">${h}°, ${s}%, ${l}%</div></div>`;
+    }
+    pick.addEventListener('input', ()=>{ hexIn.value = pick.value; update(pick.value); });
+    hexIn.addEventListener('input', ()=>update(hexIn.value));
+    update('#5b8cff');
+  }});
+
+reg({id:'palette-generator', name:'Color Palette Generator', cat:'design', desc:'Generate complementary and analogous palettes from any base color.', keywords:['palette','color scheme','complementary'],
+  render(c){
+    c.innerHTML = `<div class="field-row"><div class="field"><label>Base color</label><input type="color" id="palPick" value="#5b8cff"></div></div><div id="palOut"></div>`;
+    function build(hex){
+      const [r,g,b]=hexToRgb(hex); const [h,s,l]=rgbToHsl(r,g,b);
+      function swatch(hh){ const [rr,gg,bb]=hslToRgb((hh+360)%360,s,l); return rgbToHex(rr,gg,bb); }
+      const sets = {
+        'Complementary': [0,180].map(swatch),
+        'Analogous': [-30,-15,0,15,30].map(d=>swatch(h+d)),
+        'Triadic': [0,120,240].map(d=>swatch(h+d)),
+        'Shades': [ -30,-15,0,15,30 ].map(dl=>{ const [rr,gg,bb]=hslToRgb(h,s,Math.min(95,Math.max(5,l+dl))); return rgbToHex(rr,gg,bb); }),
+      };
+      const out = c.querySelector('#palOut');
+      out.innerHTML = Object.entries(sets).map(([name,cols])=>`
+        <div style="margin-bottom:16px"><div class="result-label" style="margin-bottom:6px">${name}</div>
+        <div class="palette-row">${cols.map(cc=>`<div class="palette-swatch" data-hex="${cc}"><div class="sq" style="background:${cc}"></div><div class="code">${cc.toUpperCase()}</div></div>`).join('')}</div></div>`).join('');
+      out.querySelectorAll('.palette-swatch').forEach(s=>s.addEventListener('click', ()=>copyText(s.dataset.hex)));
+    }
+    c.querySelector('#palPick').addEventListener('input', e=>build(e.target.value));
+    build('#5b8cff');
+  }});
+
+reg({id:'contrast-checker', name:'Contrast Checker', cat:'design', desc:'Check the WCAG contrast ratio between two colors for accessibility.', keywords:['contrast','wcag','accessibility','color'],
+  render(c){
+    c.innerHTML = `<div class="field-row">
+        <div class="field"><label>Text color</label><input type="color" id="ctFg" value="#ffffff"></div>
+        <div class="field"><label>Background color</label><input type="color" id="ctBg" value="#5b8cff"></div>
+      </div>
+      <div style="padding:26px;border-radius:11px;text-align:center;font-weight:600;font-size:17px" id="ctPreview">Sample Text</div>
+      <div class="result-box" id="ctOut" style="margin-top:14px"></div>`;
+    function luminance(hex){ const [r,g,b]=hexToRgb(hex).map(v=>{ v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4); }); return 0.2126*r+0.7152*g+0.0722*b; }
+    function update(){
+      const fg=c.querySelector('#ctFg').value, bg=c.querySelector('#ctBg').value;
+      const prev=c.querySelector('#ctPreview'); prev.style.color=fg; prev.style.background=bg;
+      const L1=luminance(fg), L2=luminance(bg);
+      const ratio = (Math.max(L1,L2)+0.05)/(Math.min(L1,L2)+0.05);
+      const out = c.querySelector('#ctOut');
+      out.innerHTML = `<div class="result-grid">
+        <div><div class="result-label">Contrast Ratio</div><div class="result-big">${fmt(ratio,2)}:1</div></div>
+        <div><div class="result-label">Normal Text AA</div><div class="result-big">${ratio>=4.5?'Pass ✓':'Fail'}</div></div>
+        <div><div class="result-label">Large Text AA</div><div class="result-big">${ratio>=3?'Pass ✓':'Fail'}</div></div>
+        <div><div class="result-label">AAA</div><div class="result-big">${ratio>=7?'Pass ✓':'Fail'}</div></div>
+      </div>`;
+    }
+    c.querySelector('#ctFg').addEventListener('input', update); c.querySelector('#ctBg').addEventListener('input', update);
+    update();
+  }});
+
+/* =========================================================
+   DEVELOPER TOOLS
+   ========================================================= */
+reg({id:'json-formatter', name:'JSON Formatter & Validator', cat:'developer', desc:'Format, minify and validate JSON data.', keywords:['json','format','validate','minify'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>JSON input</label><textarea id="jfIn" style="min-height:160px" placeholder='{"key":"value"}'></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="jfFormat">Format</button><button class="btn" id="jfMin">Minify</button><button class="btn" id="jfCopy">${iconSvg('copy',15)} Copy</button></div>
+      <div id="jfMsg"></div>
+      <div class="field" style="margin-top:12px"><textarea id="jfOut" style="min-height:160px" readonly></textarea></div>`;
+    function process(fn){
+      const msg = c.querySelector('#jfMsg');
+      try{ const parsed = JSON.parse(c.querySelector('#jfIn').value); c.querySelector('#jfOut').value = fn(parsed); msg.innerHTML = `<div class="hint" style="color:var(--success)">Valid JSON ✓</div>`; }
+      catch(e){ msg.innerHTML = `<div class="error-box">Invalid JSON: ${e.message}</div>`; }
+    }
+    c.querySelector('#jfFormat').addEventListener('click', ()=>process(p=>JSON.stringify(p,null,2)));
+    c.querySelector('#jfMin').addEventListener('click', ()=>process(p=>JSON.stringify(p)));
+    c.querySelector('#jfCopy').addEventListener('click', ()=>copyText(c.querySelector('#jfOut').value));
+  }});
+
+reg({id:'base64-tool', name:'Base64 Encoder / Decoder', cat:'developer', desc:'Encode text to Base64 or decode Base64 back to text.', keywords:['base64','encode','decode'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Input</label><textarea id="b64In" placeholder="Type text or Base64..."></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="b64Enc">Encode</button><button class="btn" id="b64Dec">Decode</button><button class="btn" id="b64Copy">${iconSvg('copy',15)} Copy</button></div>
+      <div id="b64Msg"></div>
+      <div class="field" style="margin-top:12px"><textarea id="b64Out" readonly></textarea></div>`;
+    c.querySelector('#b64Enc').addEventListener('click', ()=>{ try{ c.querySelector('#b64Out').value = btoa(unescape(encodeURIComponent(c.querySelector('#b64In').value))); c.querySelector('#b64Msg').innerHTML=''; }catch(e){ c.querySelector('#b64Msg').innerHTML = `<div class="error-box">Could not encode this input.</div>`; } });
+    c.querySelector('#b64Dec').addEventListener('click', ()=>{ try{ c.querySelector('#b64Out').value = decodeURIComponent(escape(atob(c.querySelector('#b64In').value))); c.querySelector('#b64Msg').innerHTML=''; }catch(e){ c.querySelector('#b64Msg').innerHTML = `<div class="error-box">Not valid Base64 text.</div>`; } });
+    c.querySelector('#b64Copy').addEventListener('click', ()=>copyText(c.querySelector('#b64Out').value));
+  }});
+
+reg({id:'url-encoder', name:'URL Encoder / Decoder', cat:'developer', desc:'Encode or decode text for safe use in URLs.', keywords:['url encode','url decode','percent encoding'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Input</label><textarea id="urIn"></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="urEnc">Encode</button><button class="btn" id="urDec">Decode</button><button class="btn" id="urCopy">${iconSvg('copy',15)} Copy</button></div>
+      <div id="urMsg"></div>
+      <div class="field" style="margin-top:12px"><textarea id="urOut" readonly></textarea></div>`;
+    c.querySelector('#urEnc').addEventListener('click', ()=>{ c.querySelector('#urOut').value = encodeURIComponent(c.querySelector('#urIn').value); });
+    c.querySelector('#urDec').addEventListener('click', ()=>{ try{ c.querySelector('#urOut').value = decodeURIComponent(c.querySelector('#urIn').value); c.querySelector('#urMsg').innerHTML=''; }catch(e){ c.querySelector('#urMsg').innerHTML = `<div class="error-box">Not valid percent-encoded text.</div>`; } });
+    c.querySelector('#urCopy').addEventListener('click', ()=>copyText(c.querySelector('#urOut').value));
+  }});
+
+reg({id:'uuid-generator', name:'UUID Generator', cat:'developer', desc:'Generate one or many random UUID v4 values.', keywords:['uuid','guid','unique id'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('uuCount','How many','number','value="5" min="1" max="50"')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="uuGo">Generate</button><button class="btn" id="uuCopy">${iconSvg('copy',15)} Copy All</button></div>
+      <div class="list-box" id="uuOut"></div>`;
+    function gen(){
+      const n = Math.min(50, Math.max(1, num(c.querySelector('#uuCount').value)||5));
+      const ids = Array.from({length:n}, ()=>crypto.randomUUID());
+      c.querySelector('#uuOut').innerHTML = ids.map(i=>`<div>${i}</div>`).join('');
+      c.querySelector('#uuOut').dataset.val = ids.join('\n');
+    }
+    c.querySelector('#uuGo').addEventListener('click', gen);
+    c.querySelector('#uuCopy').addEventListener('click', ()=>copyText(c.querySelector('#uuOut').dataset.val||''));
+    gen();
+  }});
+
+reg({id:'timestamp-converter', name:'Timestamp Converter', cat:'developer', desc:'Convert between Unix timestamps and human-readable dates.', keywords:['unix timestamp','epoch','date converter'],
+  render(c){
+    c.innerHTML = `<div class="field-row">
+        <div class="field"><label>Unix timestamp (seconds)</label><input id="tsIn" type="number" placeholder="e.g. 1700000000"></div>
+        <div class="field"><label style="opacity:0">now</label><button class="btn" id="tsNow" style="width:100%">Use Current Time</button></div>
+      </div>
+      <div id="tsOut1"></div>
+      <div class="field-row" style="margin-top:16px">${fieldHTML('tsDate','Human date & time','datetime-local')}</div>
+      <div id="tsOut2"></div>`;
+    c.querySelector('#tsIn').addEventListener('input', function(){
+      const v = num(this.value); const out=c.querySelector('#tsOut1');
+      if(v===null){ out.innerHTML=''; return; }
+      const d = new Date(v*1000);
+      out.innerHTML = `<div class="result-box"><div class="result-label">Human date (local)</div><div class="result-big" style="font-size:16px">${d.toLocaleString()}</div></div>`;
+    });
+    c.querySelector('#tsNow').addEventListener('click', ()=>{ c.querySelector('#tsIn').value = Math.floor(Date.now()/1000); c.querySelector('#tsIn').dispatchEvent(new Event('input')); });
+    c.querySelector('#tsDate').addEventListener('input', function(){
+      const out = c.querySelector('#tsOut2'); if(!this.value){ out.innerHTML=''; return; }
+      const ts = Math.floor(new Date(this.value).getTime()/1000);
+      out.innerHTML = `<div class="result-box"><div class="result-label">Unix timestamp</div><div class="result-big">${ts}</div></div>`;
+    });
+  }});
+
+/* =========================================================
+   EVERYDAY TOOLS
+   ========================================================= */
+reg({id:'split-bill-calculator', name:'Split Bill Calculator', cat:'everyday', desc:'Split a shared bill evenly, including tip.', keywords:['split bill','group','share'],
+  render(c){
+    c.innerHTML = `<div class="field-row">${fieldHTML('sbTotal','Total bill')}${fieldHTML('sbTip','Tip %','number','value="0"')}${fieldHTML('sbPeople','People','number','value="2"')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="sbGo">Split</button></div><div id="sbOut"></div>`;
+    c.querySelector('#sbGo').addEventListener('click', ()=>{
+      const total=num(c.querySelector('#sbTotal').value), tip=num(c.querySelector('#sbTip').value)||0, people=num(c.querySelector('#sbPeople').value);
+      const out=c.querySelector('#sbOut');
+      if(total===null||people===null||people<1||total<0){ out.innerHTML=`<div class="error-box">Enter a valid total and at least 1 person.</div>`; return; }
+      const withTip = total*(1+tip/100);
+      out.innerHTML = `<div class="result-box"><div class="result-grid">
+        <div><div class="result-label">Total incl. tip</div><div class="result-big">${fmt(withTip)}</div></div>
+        <div><div class="result-label">Each person pays</div><div class="result-big">${fmt(withTip/people)}</div></div>
+      </div></div>`;
+    });
+  }});
+
+/* =========================================================
+   RANDOM & DECISION
+   ========================================================= */
+reg({id:'spin-wheel', name:'Spin the Wheel', cat:'random', desc:'Add your own options and spin a wheel to pick one at random.', keywords:['spin wheel','random picker','decision'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Options (one per line)</label><textarea id="swOptions" style="min-height:110px">Pizza
+Burger
+Sushi
+Salad</textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="swSpin">Spin</button></div>
+      <div id="swResult" class="result-box" style="display:none;text-align:center"></div>`;
+    c.querySelector('#swSpin').addEventListener('click', ()=>{
+      const opts = c.querySelector('#swOptions').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const out = c.querySelector('#swResult');
+      if(opts.length<2){ toast('Add at least 2 options'); return; }
+      out.style.display='block'; out.innerHTML = `<div class="result-big">Spinning...</div>`;
+      let i=0; const spins = 18+Math.floor(Math.random()*10);
+      const iv = setInterval(()=>{
+        out.innerHTML = `<div class="result-big">${opts[i%opts.length]}</div>`;
+        i++;
+        if(i>spins){ clearInterval(iv); const winner = opts[Math.floor(Math.random()*opts.length)]; out.innerHTML = `<div class="result-label">Winner</div><div class="result-big">🎉 ${winner}</div>`; }
+      }, 90);
+    });
+  }});
+
+reg({id:'team-generator', name:'Random Team Generator', cat:'random', desc:'Split a list of names into random balanced teams.', keywords:['team generator','random teams','group split'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Names (one per line)</label><textarea id="tgNames" style="min-height:130px">Alice
+Bob
+Carol
+Dave
+Eve
+Frank</textarea></div>
+      <div class="field-row">${fieldHTML('tgTeams','Number of teams','number','value="2"')}</div>
+      <div class="btn-row"><button class="btn btn-primary" id="tgGo">Create Teams</button></div><div id="tgOut"></div>`;
+    c.querySelector('#tgGo').addEventListener('click', ()=>{
+      let names = c.querySelector('#tgNames').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const teamCount = Math.max(2, num(c.querySelector('#tgTeams').value)||2);
+      const out = c.querySelector('#tgOut');
+      if(names.length<teamCount){ out.innerHTML=`<div class="error-box">Need at least as many names as teams.</div>`; return; }
+      for(let i=names.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [names[i],names[j]]=[names[j],names[i]]; }
+      const teams = Array.from({length:teamCount}, ()=>[]);
+      names.forEach((n,i)=>teams[i%teamCount].push(n));
+      out.innerHTML = `<div class="tool-grid">${teams.map((t,i)=>`<div class="result-box"><div class="result-label">Team ${i+1}</div>${t.map(n=>`<div>${n}</div>`).join('')}</div>`).join('')}</div>`;
+    });
+  }});
+
+reg({id:'decision-maker', name:'Decision Maker', cat:'random', desc:'Can\'t decide? Let SmartTools pick randomly from your options.', keywords:['decision maker','random choice','yes or no'],
+  render(c){
+    c.innerHTML = `<div class="field"><label>Your options (one per line)</label><textarea id="dmOpts" style="min-height:110px">Yes
+No
+Maybe</textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="dmGo">Decide For Me</button></div>
+      <div class="result-box" id="dmOut" style="display:none;text-align:center"></div>`;
+    c.querySelector('#dmGo').addEventListener('click', ()=>{
+      const opts = c.querySelector('#dmOpts').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const out = c.querySelector('#dmOut');
+      if(opts.length<2){ toast('Add at least 2 options'); return; }
+      out.style.display='block';
+      out.innerHTML = `<div class="result-big">${opts[Math.floor(Math.random()*opts.length)]}</div>`;
+    });
+  }});
+
+/* =========================================================
+   BRAIN TRAINING
+   ========================================================= */
+reg({id:'typing-speed-test', name:'Typing Speed Test', cat:'brain', desc:'Measure your typing speed (WPM) and accuracy.', keywords:['typing test','wpm','words per minute'],
+  render(c){
+    const samples = [
+      "the quick brown fox jumps over the lazy dog while the sun sets slowly behind the hills",
+      "practice makes progress and every small improvement adds up to something meaningful over time",
+      "smart tools help people calculate convert create learn and play all from one simple website",
+      "typing quickly and accurately is a skill that improves the more consistently you practice it",
+    ];
+    c.innerHTML = `<div class="type-sample" id="tySample"></div>
+      <textarea id="tyInput" placeholder="Start typing the text above..." style="min-height:70px"></textarea>
+      <div class="btn-row"><button class="btn" id="tyRestart">${iconSvg('reset',15)} New Text</button></div>
+      <div id="tyOut"></div>`;
+    let sample, startTime=null, done=false;
+    const sampleEl = c.querySelector('#tySample'), input = c.querySelector('#tyInput'), out = c.querySelector('#tyOut');
+    function newSample(){
+      sample = samples[Math.floor(Math.random()*samples.length)];
+      startTime=null; done=false; input.value=''; out.innerHTML='';
+      render();
+    }
+    function render(){
+      const typed = input.value;
+      sampleEl.innerHTML = sample.split('').map((ch,i)=>{
+        if(i<typed.length){ return `<span class="${typed[i]===ch?'correct':'wrong'}">${ch}</span>`; }
+        if(i===typed.length) return `<span class="current">${ch}</span>`;
+        return `<span>${ch}</span>`;
+      }).join('');
+    }
+    input.addEventListener('input', ()=>{
+      if(done) return;
+      if(!startTime) startTime = Date.now();
+      render();
+      if(input.value.length>=sample.length){
+        done = true;
+        const mins = (Date.now()-startTime)/60000;
+        const words = sample.split(' ').length;
+        const wpm = Math.round(words/Math.max(mins,0.008));
+        let correct=0; for(let i=0;i<sample.length;i++) if(input.value[i]===sample[i]) correct++;
+        const accuracy = Math.round((correct/sample.length)*100);
+        const isBest = setBest('typing-speed-test', wpm, true);
+        out.innerHTML = `<div class="result-box"><div class="result-grid">
+          <div><div class="result-label">Speed</div><div class="result-big">${wpm} WPM</div></div>
+          <div><div class="result-label">Accuracy</div><div class="result-big">${accuracy}%</div></div>
+          <div><div class="result-label">Personal Best</div><div class="result-big">${getBest('typing-speed-test')} WPM ${isBest?'🎉':''}</div></div>
+        </div></div>`;
+      }
+    });
+    c.querySelector('#tyRestart').addEventListener('click', newSample);
+    newSample();
+  }});
+
+reg({id:'reaction-speed-test', name:'Reaction Speed Test', cat:'brain', desc:'Test how fast you react — click as soon as the box turns green.', keywords:['reaction test','reflex','speed test'],
+  render(c){
+    c.innerHTML = `<div class="reaction-box" id="rxBox" style="background:var(--surface-2);color:var(--text-dim)">Click to Start</div><div id="rxOut" style="margin-top:14px"></div>`;
+    const box = c.querySelector('#rxBox'), out = c.querySelector('#rxOut');
+    let state='idle', ts=0, timeoutId=null;
+    function setState(s, bg, color, text){ state=s; box.style.background=bg; box.style.color=color; box.textContent=text; }
+    box.addEventListener('click', ()=>{
+      if(state==='idle'){
+        setState('waiting','var(--warning)','#20140a','Wait for green...');
+        const delay = 1200+Math.random()*2500;
+        timeoutId = setTimeout(()=>{ setState('go','var(--success)','#062015','Click now!'); ts=Date.now(); }, delay);
+      } else if(state==='waiting'){
+        clearTimeout(timeoutId);
+        setState('idle','var(--surface-2)','var(--text-dim)','Too soon! Click to try again');
+      } else if(state==='go'){
+        const rt = Date.now()-ts;
+        const isBest = setBest('reaction-speed-test', rt, false);
+        out.innerHTML = `<div class="result-box"><div class="result-grid">
+          <div><div class="result-label">Your Time</div><div class="result-big">${rt} ms</div></div>
+          <div><div class="result-label">Personal Best</div><div class="result-big">${getBest('reaction-speed-test')} ms ${isBest?'🎉':''}</div></div>
+        </div></div>`;
+        setState('idle','var(--surface-2)','var(--text-dim)','Click to try again');
+      }
+    });
+  }});
+
+reg({id:'number-memory-game', name:'Number Memory Game', cat:'brain', desc:'Watch a number appear, then type it back from memory. Levels get longer each round.', keywords:['memory game','number memory','brain training'],
+  render(c){
+    c.innerHTML = `<div class="result-box" style="text-align:center"><div class="result-label">Level</div><div class="result-big" id="nmLevel">1</div></div>
+      <div style="text-align:center;margin:18px 0"><div class="calc-main" id="nmDisplay" style="font-size:38px">Ready?</div></div>
+      <input id="nmInput" type="text" inputmode="numeric" placeholder="Type the number you saw" style="display:none;text-align:center;font-size:20px;font-family:var(--font-mono)">
+      <div class="btn-row" style="justify-content:center"><button class="btn btn-primary" id="nmStart">Start</button></div>
+      <div id="nmOut" style="text-align:center;margin-top:10px"></div>`;
+    let level=1, current='';
+    const disp=c.querySelector('#nmDisplay'), inp=c.querySelector('#nmInput'), out=c.querySelector('#nmOut'), lvlEl=c.querySelector('#nmLevel');
+    function round(){
+      lvlEl.textContent = level;
+      current = String(Math.floor(Math.random()*9)+1);
+      for(let i=1;i<level+2;i++) current += Math.floor(Math.random()*10);
+      disp.style.display='block'; inp.style.display='none'; out.innerHTML='';
+      disp.textContent = current;
+      setTimeout(()=>{ disp.textContent='?'; inp.style.display='block'; inp.value=''; inp.focus(); }, 1200+level*250);
+    }
+    inp.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){
+        if(inp.value===current){
+          level++; const isBest = setBest('number-memory-game', level-1, true);
+          out.innerHTML = `<div style="color:var(--success);font-weight:600">Correct! Moving to level ${level}. Best: ${getBest('number-memory-game')}</div>`;
+          setTimeout(round, 900);
+        } else {
+          setBest('number-memory-game', level-1, true);
+          out.innerHTML = `<div style="color:var(--danger);font-weight:600">Not quite — it was ${current}. Best level reached: ${getBest('number-memory-game')||0}</div>`;
+          level=1; disp.textContent='Ready?'; inp.style.display='none'; lvlEl.textContent=1;
+        }
+      }
+    });
+    c.querySelector('#nmStart').addEventListener('click', ()=>{ level=1; round(); });
+  }});
+
+/* =========================================================
+   MINI GAMES
+   ========================================================= */
+reg({id:'tic-tac-toe', name:'Tic-Tac-Toe', cat:'games', desc:'Classic two-player Tic-Tac-Toe, played locally on one device.', keywords:['tic tac toe','xo game'],
+  render(c){
+    c.innerHTML = `<div id="tttTurn" style="margin-bottom:12px;font-weight:600">Turn: X</div><div class="ttt-board" id="tttBoard"></div><div class="btn-row"><button class="btn" id="tttReset">${iconSvg('reset',15)} Reset</button></div>`;
+    let board = Array(9).fill(''), turn='X', over=false;
+    const boardEl = c.querySelector('#tttBoard'), turnEl = c.querySelector('#tttTurn');
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    function draw(){
+      boardEl.innerHTML = board.map((v,i)=>`<div class="ttt-cell" data-i="${i}">${v}</div>`).join('');
+      boardEl.querySelectorAll('.ttt-cell').forEach(cell=>cell.addEventListener('click', ()=>{
+        const i = +cell.dataset.i; if(board[i]||over) return;
+        board[i]=turn;
+        const win = wins.find(w=>w.every(idx=>board[idx]===turn));
+        if(win){ over=true; turnEl.textContent = `${turn} wins! 🎉`; }
+        else if(board.every(Boolean)){ over=true; turnEl.textContent = `It's a draw`; }
+        else { turn = turn==='X'?'O':'X'; turnEl.textContent = `Turn: ${turn}`; }
+        draw();
+      }));
+    }
+    c.querySelector('#tttReset').addEventListener('click', ()=>{ board=Array(9).fill(''); turn='X'; over=false; turnEl.textContent='Turn: X'; draw(); });
+    draw();
+  }});
+
+reg({id:'rock-paper-scissors', name:'Rock Paper Scissors', cat:'games', desc:'Play Rock Paper Scissors against the computer.', keywords:['rock paper scissors','rps game'],
+  render(c){
+    c.innerHTML = `<div class="stat-strip" style="margin-bottom:16px">
+        <div><div class="n" id="rpsYou">0</div><div class="l">You</div></div>
+        <div><div class="n" id="rpsCpu">0</div><div class="l">Computer</div></div>
+      </div>
+      <div class="rps-row"><div class="rps-choice" data-c="🪨">🪨</div><div class="rps-choice" data-c="📄">📄</div><div class="rps-choice" data-c="✂️">✂️</div></div>
+      <div class="result-box" id="rpsOut" style="margin-top:14px"></div>`;
+    const beats = {'🪨':'✂️','📄':'🪨','✂️':'📄'};
+    let you=0, cpu=0;
+    c.querySelectorAll('.rps-choice').forEach(b=>b.addEventListener('click', ()=>{
+      const mine = b.dataset.c, opts=['🪨','📄','✂️'], theirs = opts[Math.floor(Math.random()*3)];
+      let res;
+      if(mine===theirs) res='Draw';
+      else if(beats[mine]===theirs){ res='You win!'; you++; }
+      else { res='Computer wins'; cpu++; }
+      c.querySelector('#rpsYou').textContent=you; c.querySelector('#rpsCpu').textContent=cpu;
+      c.querySelector('#rpsOut').innerHTML = `<div class="result-big">${mine} vs ${theirs} — ${res}</div>`;
+    }));
+  }});
+
+/* =========================================================
+   QUIZ CENTER
+   ========================================================= */
+const QUIZ_BANK = [
+  {q:'What is the capital of Japan?', a:['Seoul','Tokyo','Beijing','Bangkok'], c:1},
+  {q:'What is the chemical symbol for water?', a:['H2O','O2','CO2','NaCl'], c:0},
+  {q:'How many continents are there on Earth?', a:['5','6','7','8'], c:2},
+  {q:'What is 12 × 8?', a:['96','86','106','88'], c:0},
+  {q:'Which planet is known as the Red Planet?', a:['Venus','Mars','Jupiter','Saturn'], c:1},
+  {q:'Who wrote "Romeo and Juliet"?', a:['Charles Dickens','Mark Twain','William Shakespeare','Leo Tolstoy'], c:2},
+  {q:'What is the largest ocean on Earth?', a:['Atlantic','Indian','Arctic','Pacific'], c:3},
+  {q:'What gas do plants absorb from the air?', a:['Oxygen','Carbon Dioxide','Nitrogen','Hydrogen'], c:1},
+  {q:'How many sides does a hexagon have?', a:['5','6','7','8'], c:1},
+  {q:'What is the fastest land animal?', a:['Lion','Cheetah','Horse','Leopard'], c:1},
+  {q:'What does "HTML" stand for?', a:['HyperText Markup Language','HighText Machine Language','HyperText Modern Language','HyperTransfer Markup Language'], c:0},
+  {q:'What is the square root of 81?', a:['7','8','9','10'], c:2},
+];
+reg({id:'quick-quiz', name:'Quick General Knowledge Quiz', cat:'quiz', desc:'Answer 5 random questions and see your score at the end.', keywords:['quiz','general knowledge','trivia'],
+  render(c){
+    c.innerHTML = `<div id="qzArea"></div>`;
+    const area = c.querySelector('#qzArea');
+    let questions, idx, score, answered;
+    function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    function start(){
+      questions = shuffle(QUIZ_BANK).slice(0,5); idx=0; score=0; answered=false;
+      showQ();
+    }
+    function showQ(){
+      answered=false;
+      const item = questions[idx];
+      area.innerHTML = `<div class="hint">Question ${idx+1} of ${questions.length} — Score: ${score}</div>
+        <div class="quiz-q" style="margin-top:8px">${item.q}</div>
+        ${item.a.map((opt,i)=>`<button class="quiz-opt" data-i="${i}">${opt}</button>`).join('')}`;
+      area.querySelectorAll('.quiz-opt').forEach(btn=>btn.addEventListener('click', ()=>{
+        if(answered) return; answered=true;
+        const chosen = +btn.dataset.i;
+        area.querySelectorAll('.quiz-opt').forEach((b2,i2)=>{
+          if(i2===item.c) b2.classList.add('correct');
+          else if(i2===chosen) b2.classList.add('wrong');
+        });
+        if(chosen===item.c) score++;
+        setTimeout(()=>{ idx++; if(idx<questions.length) showQ(); else finish(); }, 900);
+      }));
+    }
+    function finish(){
+      const isBest = setBest('quick-quiz', score, true);
+      area.innerHTML = `<div class="result-box" style="text-align:center">
+        <div class="result-label">Quiz Complete</div>
+        <div class="result-big">${score} / ${questions.length}</div>
+        <div class="hint">Personal best: ${getBest('quick-quiz')} ${isBest?'🎉 New best!':''}</div>
+      </div><div class="btn-row" style="justify-content:center"><button class="btn btn-primary" id="qzAgain">Play Again</button></div>`;
+      area.querySelector('#qzAgain').addEventListener('click', start);
+    }
+    start();
+  }});
+
+/* =========================================================
+   ROUTER + RENDERERS
+   ========================================================= */
+function toolCardHTML(t, small=false){
+  const cat = catInfo(t.cat);
+  return `<div class="tool-card" style="--cat-color:${cat.color}" data-id="${t.id}" tabindex="0" role="button">
+    <div class="tc-top">
+      <div class="tc-icon">${iconSvg(cat.icon)}</div>
+      <button class="fav-btn ${favorites.has(t.id)?'active':''}" data-fav="${t.id}" aria-label="Toggle favorite">${iconSvg(favorites.has(t.id)?'starFill':'star',16)}</button>
+    </div>
+    <div class="tc-name">${t.name}</div>
+    ${small?'':`<div class="tc-desc">${t.desc}</div>`}
+    <div class="tc-cat">${cat.name}</div>
+  </div>`;
+}
+function bindToolCards(container){
+  container.querySelectorAll('.tool-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-fav]')) return;
+      navigate('#/tool/'+card.dataset.id);
+    });
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter') navigate('#/tool/'+card.dataset.id); });
+  });
+  container.querySelectorAll('[data-fav]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      toggleFavorite(btn.dataset.fav);
+      btn.classList.toggle('active');
+      btn.innerHTML = iconSvg(favorites.has(btn.dataset.fav)?'starFill':'star',16);
+    });
+  });
+}
+
+function renderCatNav(){
+  const nav = document.getElementById('catnav');
+  nav.innerHTML = `<div class="catnav-inner">
+    <div class="chip" data-c="">All Tools</div>
+    ${CATEGORIES.map(c=>`<div class="chip" data-c="${c.id}">${c.name}</div>`).join('')}
+  </div>`;
+  nav.querySelectorAll('.chip').forEach(chip=>chip.addEventListener('click', ()=>{
+    const cid = chip.dataset.c;
+    navigate(cid? '#/category/'+cid : '#/all');
+  }));
+}
+renderCatNav();
+
+function highlightCatNav(catId){
+  document.querySelectorAll('.catnav .chip').forEach(chip=>{
+    chip.classList.toggle('active', chip.dataset.c===(catId||''));
+  });
+}
+
+function renderHome(){
+  const popularIds = ['basic-calculator','unit-converter','word-counter','percentage-calculator','random-password-generator','json-formatter','quick-quiz','typing-speed-test'];
+  const popular = popularIds.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+  const favTools = [...favorites].map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+  const recentTools = recents.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="hero">
+      <h1>Smart<span class="accent-word">Tools</span></h1>
+      <p>Calculate. Convert. Create. Learn. Play. — one website, ${TOOLS.length}+ tools and growing.</p>
+      <div class="hero-search">
+        <div class="searchbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="heroSearch" type="text" placeholder="What do you want to do?" autocomplete="off">
+        </div>
+      </div>
+      <div class="quickactions">
+        ${[['calculators','Calculate'],['converters','Convert'],['text','Text'],['datetime','Study'],['brain','Brain'],['quiz','Quiz'],['games','Games']].map(([id,label])=>
+          `<div class="qa-pill" data-c="${id}">${label}</div>`).join('')}
+      </div>
+    </section>
+
+    ${favTools.length? `<section class="section"><div class="section-head"><h2>Your Favorites</h2></div><div class="tool-grid" id="favGrid"></div></section>`:''}
+    ${recentTools.length? `<section class="section"><div class="section-head"><h2>Recently Used</h2></div><div class="tool-grid" id="recentGrid"></div></section>`:''}
+
+    <section class="section">
+      <div class="section-head"><h2>Popular Tools</h2></div>
+      <div class="tool-grid" id="popGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Browse by Category</h2></div>
+      <div class="cat-grid" id="catGrid"></div>
+    </section>
+  `;
+  if(favTools.length) app.querySelector('#favGrid').innerHTML = favTools.map(t=>toolCardHTML(t,true)).join('');
+  if(recentTools.length) app.querySelector('#recentGrid').innerHTML = recentTools.map(t=>toolCardHTML(t,true)).join('');
+  app.querySelector('#popGrid').innerHTML = popular.map(t=>toolCardHTML(t)).join('');
+  app.querySelector('#catGrid').innerHTML = CATEGORIES.map(cat=>{
+    const count = TOOLS.filter(t=>t.cat===cat.id).length;
+    return `<div class="cat-card" data-c="${cat.id}" style="--cat-color:${cat.color}">
+      <div class="cc-icon">${iconSvg(cat.icon,19)}</div>
+      <div class="cc-name">${cat.name}</div>
+      <div class="cc-count">${count} tool${count!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+  app.querySelectorAll('.cat-card').forEach(cc=>cc.addEventListener('click', ()=>navigate('#/category/'+cc.dataset.c)));
+  app.querySelectorAll('.qa-pill').forEach(p=>p.addEventListener('click', ()=>navigate('#/category/'+p.dataset.c)));
+  bindToolCards(app);
+
+  const hs = document.getElementById('heroSearch');
+  hs.addEventListener('input', ()=>{ document.getElementById('searchInput').value = hs.value; runSearch(hs.value); document.getElementById('searchInput').focus(); });
+
+  highlightCatNav(null);
+}
+
+function renderAllTools(){
+  const app = document.getElementById('app');
+  app.innerHTML = `<div class="breadcrumb"><a href="#/" onclick="navigate('#/')">Home</a><span class="sep">/</span>All Tools</div>
+    <div class="tool-header"><div><h1>All Tools</h1><p>Every tool currently available on SmartTools, ${TOOLS.length} in total.</p></div></div>
+    <div class="tool-grid" id="allGrid"></div>`;
+  app.querySelector('#allGrid').innerHTML = TOOLS.map(t=>toolCardHTML(t)).join('');
+  bindToolCards(app);
+  highlightCatNav(null);
+}
+
+function renderCategory(catId){
+  const cat = catInfo(catId);
+  const app = document.getElementById('app');
+  if(!cat){ app.innerHTML = `<div class="empty-note">Category not found.</div>`; return; }
+  const tools = TOOLS.filter(t=>t.cat===catId);
+  app.innerHTML = `<div class="breadcrumb"><a href="#/" onclick="navigate('#/')">Home</a><span class="sep">/</span>${cat.name}</div>
+    <div class="tool-header"><div><h1>${cat.name}</h1><p>${cat.desc}</p></div></div>
+    <div class="tool-grid" id="catToolsGrid"></div>`;
+  const grid = app.querySelector('#catToolsGrid');
+  grid.innerHTML = tools.length ? tools.map(t=>toolCardHTML(t)).join('') : '';
+  if(!tools.length) grid.outerHTML = `<div class="empty-note">More ${cat.name.toLowerCase()} are on the way — check back soon.</div>`;
+  bindToolCards(app);
+  highlightCatNav(catId);
+}
+
+function renderTool(toolId){
+  const t = TOOLS.find(x=>x.id===toolId);
+  const app = document.getElementById('app');
+  if(!t){ app.innerHTML = `<div class="empty-note">Tool not found. <a href="#/" onclick="navigate('#/')" style="color:var(--accent)">Go home</a></div>`; return; }
+  pushRecent(t.id);
+  const cat = catInfo(t.cat);
+  const related = TOOLS.filter(x=>x.cat===t.cat && x.id!==t.id).slice(0,6);
+  app.innerHTML = `
+    <div class="breadcrumb">
+      <a href="#/" onclick="navigate('#/')">Home</a><span class="sep">/</span>
+      <a href="#/category/${t.cat}" onclick="navigate('#/category/${t.cat}')">${cat.name}</a><span class="sep">/</span>${t.name}
+    </div>
+    <div class="tool-header">
+      <div><h1>${t.name}</h1><p>${t.desc}</p></div>
+      <div class="tool-header-actions">
+        <button class="icon-btn" id="toolFav" aria-label="Toggle favorite">${iconSvg(favorites.has(t.id)?'starFill':'star')}</button>
+      </div>
+    </div>
+    <div class="tool-panel" id="toolMount"></div>
+    ${related.length? `<div class="section"><div class="section-head"><h2>Related Tools</h2></div><div class="related-row" id="relatedRow"></div></div>`:''}
+  `;
+  t.render(app.querySelector('#toolMount'));
+  app.querySelector('#toolFav').addEventListener('click', ()=>{
+    toggleFavorite(t.id);
+    app.querySelector('#toolFav').innerHTML = iconSvg(favorites.has(t.id)?'starFill':'star');
+  });
+  if(related.length){
+    app.querySelector('#relatedRow').innerHTML = related.map(r=>toolCardHTML(r,true)).join('');
+    bindToolCards(app);
+  }
+  highlightCatNav(t.cat);
+}
+
+function renderDashboard(){
+  const app = document.getElementById('app');
+  const favTools = [...favorites].map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+  const recentTools = recents.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+  const bestEntries = Object.entries(bests);
+  app.innerHTML = `<div class="breadcrumb"><a href="#/" onclick="navigate('#/')">Home</a><span class="sep">/</span>Dashboard</div>
+    <div class="tool-header"><div><h1>Your Dashboard</h1><p>Everything here is stored only in your browser — nothing is uploaded.</p></div>
+      <div class="tool-header-actions"><button class="btn btn-danger" id="clearLocal">Clear My Local Data</button></div></div>
+
+    <section class="section"><div class="section-head"><h2>Personal Bests</h2></div>
+      ${bestEntries.length? `<div class="result-box"><div class="result-grid">${bestEntries.map(([id,val])=>{
+        const t=TOOLS.find(x=>x.id===id); return `<div><div class="result-label">${t?t.name:id}</div><div class="result-big">${val}</div></div>`;
+      }).join('')}</div></div>` : `<div class="empty-note">Play a game or take a quiz to start setting personal bests.</div>`}
+    </section>
+
+    <section class="section"><div class="section-head"><h2>Favorites (${favTools.length})</h2></div>
+      ${favTools.length? `<div class="tool-grid">${favTools.map(t=>toolCardHTML(t,true)).join('')}</div>` : `<div class="empty-note">Tap the star on any tool to add it here.</div>`}
+    </section>
+
+    <section class="section"><div class="section-head"><h2>Recently Used</h2></div>
+      ${recentTools.length? `<div class="tool-grid">${recentTools.map(t=>toolCardHTML(t,true)).join('')}</div>` : `<div class="empty-note">Tools you open will show up here.</div>`}
+    </section>`;
+  bindToolCards(app);
+  app.querySelector('#clearLocal').addEventListener('click', ()=>{
+    if(confirm('This clears your favorites, recents and personal bests from this browser. Continue?')){
+      favorites = new Set(); recents = []; bests = {};
+      saveFavorites(); saveRecents(); saveBests();
+      renderDashboard(); toast('Local data cleared');
+    }
+  });
+  highlightCatNav(null);
+}
+
+const STATIC_PAGES = {
+  about: {title:'About SmartTools', body:`<p>SmartTools is a single, privacy-conscious website that brings together calculators, converters, text utilities, developer tools, brain games, quizzes and casual games — so you don't need to jump between dozens of different sites for everyday tasks.</p><p>Most tools run entirely inside your browser: your inputs are processed on your device and are not uploaded anywhere unless a specific tool clearly requires it.</p>`},
+  privacy: {title:'Privacy', body:`<p>SmartTools is built to work without an account. Favorites, recently used tools, theme preference and personal bests are stored locally in your browser using local storage, and are never transmitted to a server.</p><p>Text, numbers, colors and files you enter into tools are processed locally in your browser and are not uploaded unless a tool explicitly says otherwise.</p><p>You can clear all locally stored SmartTools data at any time from your Dashboard.</p>`},
+  terms: {title:'Terms of Use', body:`<p>SmartTools is provided as a free utility platform. Calculators and converters are provided for general convenience and should not be relied on as professional medical, legal, financial, or engineering advice.</p><p>Games and quizzes are for entertainment and casual learning purposes.</p>`},
+  contact: {title:'Contact & Feedback', body:`<p>Found a bug or have an idea for a new tool? SmartTools is under active development — more calculators, converters, games and quizzes are being added in upcoming updates.</p>`},
+};
+function renderStaticPage(id){
+  const page = STATIC_PAGES[id];
+  const app = document.getElementById('app');
+  if(!page){ app.innerHTML = `<div class="empty-note">Page not found.</div>`; return; }
+  app.innerHTML = `<div class="breadcrumb"><a href="#/" onclick="navigate('#/')">Home</a><span class="sep">/</span>${page.title}</div>
+    <div class="tool-header"><h1>${page.title}</h1></div>
+    <div class="tool-panel" style="max-width:720px; font-size:14.5px; color:var(--text-dim); line-height:1.7">${page.body}</div>`;
+  highlightCatNav(null);
+}
+
+function navigate(hash){
+  window.location.hash = hash;
+}
+function router(){
+  const hash = window.location.hash || '#/';
+  window.scrollTo(0,0);
+  closeSearch();
+  const parts = hash.replace('#/','').split('/').filter(Boolean);
+  if(parts.length===0) return renderHome();
+  if(parts[0]==='all') return renderAllTools();
+  if(parts[0]==='category') return renderCategory(parts[1]);
+  if(parts[0]==='tool') return renderTool(parts[1]);
+  if(parts[0]==='dashboard') return renderDashboard();
+  if(parts[0]==='page') return renderStaticPage(parts[1]);
+  return renderHome();
+}
+window.addEventListener('hashchange', router);
+
+/* ---------------- SEARCH ---------------- */
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const searchClear = document.getElementById('searchClear');
+function scoreTool(t, q){
+  q = q.toLowerCase();
+  let score = 0;
+  if(t.name.toLowerCase()===q) score+=100;
+  if(t.name.toLowerCase().includes(q)) score+=50;
+  if(t.keywords.some(k=>k.toLowerCase()===q)) score+=60;
+  if(t.keywords.some(k=>k.toLowerCase().includes(q))) score+=30;
+  if(catInfo(t.cat).name.toLowerCase().includes(q)) score+=15;
+  if(t.desc.toLowerCase().includes(q)) score+=8;
+  return score;
+}
+function runSearch(q){
+  q = q.trim();
+  searchClear.classList.toggle('show', q.length>0);
+  if(!q){ closeSearch(); return; }
+  const matches = TOOLS.map(t=>({t, s:scoreTool(t,q)})).filter(m=>m.s>0).sort((a,b)=>b.s-a.s).slice(0,8);
+  if(matches.length===0){
+    searchResults.innerHTML = `<div class="search-empty">No tools found for "${q}". Try a different word.</div>`;
+  } else {
+    searchResults.innerHTML = matches.map(({t})=>{
+      const cat = catInfo(t.cat);
+      return `<div class="search-item" data-id="${t.id}">
+        <div class="si-icon" style="color:${cat.color}">${iconSvg(cat.icon,16)}</div>
+        <div><div class="si-name">${t.name}</div><div class="si-cat">${cat.name}</div></div>
+      </div>`;
+    }).join('');
+    searchResults.querySelectorAll('.search-item').forEach(it=>it.addEventListener('click', ()=>{
+      navigate('#/tool/'+it.dataset.id);
+      searchInput.value=''; closeSearch();
+    }));
+  }
+  searchResults.classList.add('open');
+}
+function closeSearch(){ searchResults.classList.remove('open'); }
+searchInput.addEventListener('input', ()=>runSearch(searchInput.value));
+searchInput.addEventListener('focus', ()=>{ if(searchInput.value) runSearch(searchInput.value); });
+searchClear.addEventListener('click', ()=>{ searchInput.value=''; closeSearch(); searchClear.classList.remove('show'); searchInput.focus(); });
+document.addEventListener('click', (e)=>{ if(!e.target.closest('.searchwrap')) closeSearch(); });
+
+/* ---------------- INIT ---------------- */
+router();
+</script>
+</body>
+</html>
